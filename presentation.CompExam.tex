@@ -1,0 +1,531 @@
+
+%% LaTeX Beamer presentation template (requires beamer package)
+%% see http://bitbucket.org/rivanvx/beamer/wiki/Home
+%% idea contributed by H. Turgut Uyar
+%% template based on a template by Till Tantau
+%% this template is still evolving - it might differ in future releases!
+
+% \documentclass[draft]{beamer}
+% \documentclass[handout]{beamer}
+\documentclass{beamer}
+% \usepackage{pgfpages} %for two screen presentations
+% \pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm] %for handout!
+% \setbeameroption{show notes} 
+% \setbeameroption{show notes on second screen}
+% \setbeameroption{show next slide on second screen}
+% \setbeameroption{second mode text on second screen=left}
+\setbeamertemplate{navigation symbols}{}
+
+\mode<presentation>
+{
+\usetheme{Warsaw} 
+% \usetheme{Frankfurt}
+% \usetheme{Berkeley}
+\usecolortheme{seahorse}
+% \usecolortheme{rose}
+\usefonttheme[onlylarge]{structuresmallcapsserif}
+\usefonttheme[onlysmall]{structurebold}
+
+\setbeamercovered{transparent}
+\setbeamercolor{title}{fg=blue!90!black,bg=red!70!white}
+}
+
+\usepackage[english]{babel}
+\usepackage[latin1]{inputenc}
+
+% font definitions, try \usepackage{ae} instead of the following
+% three lines if you don't like this look
+\usepackage{mathptmx}
+\usepackage[scaled=.90]{helvet}
+\usepackage{courier}
+
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath}
+\usepackage{amscd}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{tikz}
+\usepackage{subcaption}
+\usepackage{subfigure}
+
+\usepackage{aviolov_style}
+\usepackage{local_style}
+
+
+\title[Spike-Control for Neurons]{Optimal Control of First-Passage Time
+in an Ornstein-Uhlenbeck Model
+\\
+---
+\\
+PhD Comprehensive Exam }
+% - Use the \inst{?} command only if the authors have different
+%   affiliation.
+\author{Alexandre Iolov}
+\institute{University of Ottawa}
+\date{January 10, 2013}
+
+% % This is only inserted into the PDF information catalog. Can be left
+% % out.
+% \subject{Talks}
+
+% If you have a file called "university-logo-filename.xxx", where xxx
+% is a graphic format that can be processed by latex or pdflatex,
+% resp., then you can add a logo as follows:
+% \pgfdeclareimage[height=0.5cm]{university-logo}{university-logo-filename}
+% \logo{\pgfuseimage{university-logo}}
+% Delete this, if you do not want the table of contents to pop up at
+% the beginning of each subsection:
+% \AtBeginSubsection[]
+% {
+% \begin{frame}<beamer>
+% \frametitle{Outline}
+% \tableofcontents[currentsection,currentsubsection]
+% \end{frame}
+% }
+
+% If you wish to uncover everything in a step-wise fashion, uncomment
+% the following command:
+%\beamerdefaultoverlayspecification{<+->}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+% \section*{Outline}
+\begin{frame}
+\tableofcontents[pausesections]
+\end{frame}
+
+\section{Problem Background}
+\subsection[LIFs]{Leaky Integrate-and-Fire Basics}
+\begin{frame}
+\frametitle{The Underlying Model}
+% \framesubtitle{Subtitles are optional}
+A voltage, $X_t$ autonomously decays to zero, is driven and spikes when it hits
+threshold:
+\begin{columns}[T]
+\begin{column}{5cm}
+\begin{equation*}
+\begin{gathered}
+dX_s = (\a(t) - \frac{X_s}{\tc} ) \intd{s} + \b \intd{W_s},
+\\
+X(0) = .0,
+\\
+X(\ts) = \xth \implies
+\begin{cases}
+\ts \sim \text{spike time} 
+\\
+X(\ts^+) = .0 &
+\end{cases}
+\end{gathered}
+\end{equation*}
+\end{column}
+\begin{column}{5cm} 
+\onslide<2->{
+  \includegraphics[width=.99\textwidth]{Figs/sinusoidal_train_N=10_example.png}
+}
+\end{column}
+\end{columns}
+
+\pause
+\begin{center}
+$\a(.) \sim$ the control
+
+$\a(t)\in [\amin,\amax]$
+\end{center}
+
+%\usepackage{graphics} is needed for \includegraphics
+% \begin{figure}[htp]
+% \begin{center}
+%   \caption[labelInTOC]{Example Voltage Trajectory + Spikes}
+%   \label{fig:voltage_spikes_example}
+% \end{center}
+% \end{figure}
+
+% \note[item]{When $X$ hits $\vt$, we have a spike}
+% \note[item]{$\a$ is our control and is completely determined by us}
+\end{frame}
+
+\subsection{Problem Objective}
+\begin{frame}
+\frametitle{Our Goal}
+\only<1-2>{
+Impose a pre-specified spike sequence,  $\{t_n\}_1^N$, on the neuron.
+}
+\onslide<2>{
+\vskip 5pt
+
+ASSUMPTION: We know when actual spikes, $\{t_{sp,n}\}$ occur
+
+$\implies$ we can work sequentially:
+
+$$
+\T = t_n - t_{sp, n-1}
+$$
+}
+\end{frame}
+
+\begin{frame}
+\frametitle{Our Goal}
+
+Given a target $\T$ find $\a(t)$ minimizing $\Exp[(\T - \ts)^2]$
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.6\textwidth]
+{Figs/ControlSimulator/DesiredVsRealized_Tsp}
+\caption{ Controlled Trajectory Example
+- observed vs.\ desired spike time 
+}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+
+\begin{frame}
+% \frametitle{Formal Problem Statement}
+
+\begin{block}{Formal Problem Statement}
+Given, $\tc, \b$, $\T$ and $X_0 = .0$, find
+
+\begin{equation}
+\a(t) = \argmin_{\a(t)} \Big\{ \, J[\a] = 
+\Exp\left[
+(\ts - \T \big)^2 
++  
+\e \int_0^\ts  \a^2(t) \intd{t}  \right]
+\, \Big\}
+\end{equation}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Control Horizon}
+Since we know if and when a spike occurs
+$$
+t>\T \implies \a(t) = \amax
+$$ 
+So our control problem takes place over the interval
+$$  t \in [0 , \T] $$ 
+\end{frame}
+
+ 
+\section{Closed-loop stochastic control - dynamic programing}
+\begin{frame}
+\frametitle{Dynamic Programing Solution}
+If we had state observations / feedback
+\vskip2pt
+$\implies$ Dynamic Programming /
+Hamilton-Jacobi-Bellman (HJB) Equations
+\vskip 3pt
+\onslide<2>{
+\begin{equation*}
+\begin{gathered}
+\di_t v(x,t) + \tfrac{\b^2}{2} \di_x^2 v + 
+\e \a^2 + (\a -\tfrac{x}{\tc}) \di_x v 
+= 0
+\\
+\a (x,t) = \min \left(\amax,
+		 \max\left(\amin, -\frac{\di_x v(x,t)}{2\e}\right)
+\right)
+\\
+\begin{cases}
+v(\xth,t) = (s-\T)^2  \quad & \textrm{upper BC}
+\\
+\di_x v(\xmin, t)  = .0  \quad &\textrm{lower BC}
+\\
+v(x,\T)  = \Exp[ (\t^2 : X_{\T+\t} = \xth) \,|\,X_\T = x, \a(t) = \amax]  \quad&
+\textrm{TC}
+\end{cases}
+\end{gathered}
+\label{eq:OC_LS_HJB_full}
+\end{equation*}
+\note[item]{explain the Terminal Condition - if we hit time $\T$ and nothing
+has happened we smash on the gas}
+}
+\end{frame}
+
+
+% \begin{frame}
+% Simplest solution $\sim$ ignore the noise!
+% 
+% $\implies$ Deterministic Optimal Control (in 1-D)
+% 
+% 
+% \begin{figure}
+% \begin{center}
+%   \includegraphics[width=.6\textwidth]{Figs/ControlSimulator/deterministic_example.png}
+%   \caption{An example trajectory for the deterministic dynamics. }
+% \end{center}
+% \end{figure}
+% 
+% \end{frame}
+% 
+% \begin{frame}
+% \frametitle{An Unfair Comparison}
+% 
+% \only<1>{
+% \begin{figure}[b]
+% \begin{center}
+% \subfloat
+% {
+% \includegraphics[width=0.4\textwidth]
+% {Figs/ControlSimulator/example_controlled_trajectories_id4.png}
+% }
+% \subfloat
+% {
+% \includegraphics[width=0.4\textwidth]
+% {Figs/ControlSimulator/example_controlled_trajectories_id3.png}
+% }
+% \caption[]{Controlled trajectories using deterministic
+% vs. stochastic control approaches. $\T$ is indicated with the red vertical
+% line, $\tc, \b = [.75, 1.25]$.}
+% \end{center}
+% \end{figure}
+% \note[item]{In A the performance of both
+% control laws is essentially the same, but in B we see the advantage of the
+% stochastic approach}
+% }
+% \only<2-3>{
+% \begin{table}[b]
+% \centering
+% \begin{tabular}{lcc}
+% Control Law & Empirical Error & Theoretical Error
+% \\
+% \hline
+% Open-Loop Deterministic &  0.647  \onslide<3>{$\swarrow$} &  - \\
+% Closed-Loop  Stochastic &  0.336  \onslide<3>{$\nwarrow$} &  0.285 \\
+% \end{tabular}
+% \caption{Realized performance of the different control laws. The Error is $\Exp
+% \left[ (\T - \ts)^2 \right] $}
+% \label{tab:realized_avg_errors_det_vs_stoch}
+% \end{table}
+% }
+% \onslide<3>{
+% \vskip 5pt
+% \begin{center}
+% Can we do better?
+% \end{center}
+% }
+% \end{frame}
+
+
+
+
+\section{Open-loop Stochastic Control - maximum principle}
+\begin{frame}
+\frametitle{Maximum Principle Solution}
+Consider, $f(x,t)$, the forward transition density for $X_t$
+\vskip 2pt
+\only<1>{
+\vskip 10pt
+\begin{align*}
+\Exp\left[
+(\ts - \T \big)^2 \right]
+=&
+\int_0^\ts (t-\T)^2 \cdot \left( - \frac {\b^2} 2 \di_x f(\xth, t) \right) 
+\intd{t}
+\\
+&+
+\int_\xmin^\xth 
+\Exp[\t^2|x, \amax] \cdot f(x,\T) \intd{x}
+\end{align*}
+\vskip 12pt
+}
+\only<2-3>{
+\begin{center}
+\begin{tikzpicture}[scale = 1.5]
+\draw[->][dashed] (-.75, 1.) --
+		node[at start, left]{$\xth$}
+		node[at end, right] {$t$}
+		(1.9,1.);
+		
+\draw[->][very thick] (.1, .5) --
+		node[at start, left] 
+			{$\Big[(t-\T)^2 \cdot \tfrac{-\b^2} 2 \di_x f\Big]$}
+		node[at end , above]{``EARLY''}
+		(.5,1.25);	
+
+ \draw[->][dashed] 		
+		(1.5,-.0) --
+		node[at start, below]{$\T$}
+		node[at end, above]{$x$}
+		(1.5,1.25) ;
+		
+		\draw[->][very thick] (1.2, .0) --
+		node[at start, left] {$\Big[\Exp[\t^2|x, \amax] \cdot f\Big]$}
+		node[at end , right]{``LATE''}
+		(1.8,.5);	 
+\end{tikzpicture}
+\end{center}
+}
+\vskip 1pt
+\indent $f(x,t) \sim$ deterministic (it satisfies a Fokker-Planck equation)
+\begin{align*}
+\di_t f(x,t) =& -\di_x \left[(\a(t) - \frac{x}{\tc} )  f \right] + 
+\frac{1}{2}\di^2_x \left[\b^2 f \right]
+\end{align*}
+
+\vskip 2pt
+$\implies$ optimize using $f$
+\vskip 2pt
+
+\onslide<3>{
+\begin{center}
+But how do we optimize with PDEs?
+\end{center}
+}
+\end{frame}
+
+\begin{frame}
+\frametitle{Lagrange Multipliers for PDEs}
+\begin{align*}
+J[\a]
+=&
+\int_\xmin^\xth 
+\underbrace{\Exp[\t^2|x, \amax]}_{\Ttwo(x)} \cdot f(x,\T) \intd{x}
+\\
+&+ \int_0^\ts (t-\T)^2 \cdot \left( - \frac {\b^2} 2 \di_x f(\xth, t) \right) 
+\intd{t}
+\end{align*}
+\\
+\pause
+\begin{align*}
+&+ \int_0^\ts\int_\xmin^\xth
+\underbrace{p(x,t)}_{\textrm{co-state}} \cdot \underbrace{(\di_t f -
+(-\di_x \big[(\a(t) - \frac{x}{\tc} )  f \big] + \frac{1}{2}\di^2_x \left[\b^2 f \right] ))}_{\textrm{F-P eq'n}}
+\intd{x}\intd{t}
+\end{align*}
+\pause
+Optimality Principle:
+$$
+\frac{\delta J}{\delta \a} = 0 
+$$
+\end{frame}
+
+\begin{frame}
+\frametitle{Forward-Backward System}
+\begin{minipage}{0.48\linewidth}
+\begin{tikzpicture}[scale = .8]
+\draw[->] (-.25,1) -- node[above]   {$f$} node[below]{State}
+	(4.5,1) ;
+\end{tikzpicture}
+\includegraphics[width=0.75\textwidth]{Figs/FP_Adjoint/Stylized__f.png}
+\end{minipage}
+\vline 
+\begin{minipage}{0.48\linewidth}
+\begin{flushright}
+
+\includegraphics[width=0.75\textwidth]{Figs/FP_Adjoint/Stylized__p.png}
+
+\begin{tikzpicture}[scale =.8]
+\draw[<-] (-.25,-1) -- node[below]   {$p$} node[above]{Co-State}
+	(4.5,-1) ;
+\end{tikzpicture}
+\end{flushright}
+\end{minipage}
+
+% \hline
+% \vskip 3pt
+% \begin{equation*}
+% \Big\{
+%  \e  2 \cdot \a(t)
+% + p f \Big|_\xmin
+% - \int _\xmin^\xth p \cdot \di_x f \intd{x} 
+% \Big\} = 0
+% \quad \forall t \in [0,T]
+% \end{equation*}
+\end{frame}
+
+\begin{frame}
+\frametitle{Gradient Descent}
+\begin{equation*}
+\grad_\a [J] = 
+ \e  2 \cdot \a(t)
++ p f \Big|_\xmin
+- \int _\xmin^\xth p \cdot \di_x f \intd{x} 
+\end{equation*}
+
+\vskip 5pt
+
+\begin{center}
+We can use $\grad_\a J$ for gradient-based numerical optimization
+\end{center}
+\end{frame}
+
+\begin{frame}
+% \frametitle{A more fair comparison}
+\frametitle{Simulation Comparison}
+\only<1>{
+\begin{figure}[h]
+\begin{center}
+\subfloat 
+{
+\label{fig:controlled_traj_ex1}
+\includegraphics[width=0.40\textwidth]
+{Figs/ControlSimulator/open_vs_closed_example_trajectories_id6.png}
+}
+\subfloat 
+{
+\includegraphics[width=0.40\textwidth]
+{Figs/ControlSimulator/open_vs_closed_example_trajectories_id5.png}
+}
+\caption[]{
+Controlled trajectories using open-loop vs.\
+closed-loop control laws. $\T$ is indicated with the red 
+vertical line, $\tc, \b = [.75, 1.25]$.} 
+\end{center}
+\end{figure}
+}
+
+\only<2> {\begin{table}[h] 
+\centering
+\begin{tabular}{lcc}
+Control Law & Empirical Error & Theoretical Error \\
+\hline
+% Deterministic $(\b=0)$ &  0.621 & - \\
+Open-Loop Stochastic & 0.356 & 0.382\\
+Feedback Stochastic &  0.288& 0.285\\
+\hline
+\end{tabular}
+\caption{Realized and theoretical performance of the different control laws. The empirical
+performance is obtained using 128 sample paths.}
+\label{tab:realized_avg_errors_det_vs_openloop_vs_stoch}
+\end{table}
+}
+
+\end{frame}
+
+\section*{Summary}
+
+\begin{frame}
+\frametitle<presentation>{Summary}
+\begin{block}{Has been shown:}
+  \begin{itemize}
+    \item A stochastic control problem with minimal observations can be re-stated as a
+deterministic optimal control problem using the transition density. 
+
+	\item The deterministic optimal control problem can be solved using an
+infinite-dimensional Pontryagin-type Principle and a simple gradient descent
+procedure.
+  \end{itemize}
+\end{block}
+
+\vskip0pt plus.5fill
+
+\begin{block}{To be addressed:}
+  \begin{itemize}
+    \item Where to apply this?
+  \end{itemize}
+\end{block}
+
+\end{frame}
+
+\end{document}

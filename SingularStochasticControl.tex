@@ -1,0 +1,106 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amscd}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{circuitikz}
+\usepackage{pgf}
+\usepackage{tikz}
+\usetikzlibrary{arrows,snakes,backgrounds}
+% \usetikz
+\usepackage{subfig}
+
+\usepackage[super]{nth}
+% \usepackage{appendix}
+% \usepackage{listings}
+% \usepackage{color}
+
+\usepackage{hyperref}
+%\usepackage{url}
+
+\usepackage{cleveref}
+
+\usepackage{aviolov_style}
+\usepackage{local_style}
+
+\begin{document}
+
+
+\title{Singular Stochastic Control} \author{Alexandre Iolov 
+$<$\href{mailto:aiolo040@uottawa.ca}
+		{aiolo040 at uottawa dot ca}$>$}
+
+\date{\today}
+
+\maketitle
+
+\abstract{How to solve HJB equations, whose Hamiltonian is linear in the
+control and there is no guarantee that $\di_x v \neq 0$?}
+
+\section{Problem Statement}
+
+Consider a 2nd order HJB equation in 1-d with no running costs and fixed
+terminal time $\tf$:
+\begin{equation}
+\begin{gathered}
+dX_s =  (\a(s) - X_s) \intd{s} + \b \intd{W_s} 
+\\
+J[\a] = M(X_\tf)
+\\
+\di_t v(x,t) + \inf_{\a} \left\{ \tfrac{\b^2}{2} \di_x^2 v + 
+(\a(t) - x) \di_x v \right\} = 0
+\\
+\ldots + \textrm{BCs, TCs}
+\end{gathered}
+\label{eq:HJB_singular}
+\end{equation} 
+We are solving $v(x,t)$ on some closed, bounded domain $\O \subset \R \times
+[0,\tf]$.
+
+As long as $\di_x v \neq 0$, we will have a 'bang-bang' type control for
+$\a(t)$:
+\begin{equation}
+\a(t) =
+\begin{cases}
+\amin & \di_x v > 0
+\\
+\amax & \di_x v < 0
+\end{cases}
+\end{equation}
+But what to do if $\di_x v= 0$?
+
+There is a solution for this problem in the deterministic optimal control
+theory. In the deterministic optimal control, the quantity:
+$$
+H(x,p) = \inf_{\a} \left\{
+(\a(t) - x) p \right\}
+$$
+is called the 'Hamiltonian'. The problem is called 'singular', when $p=0$, since
+then it is impossible to know the value of $\a$ that attains the minimum. The
+remedy is to note that along optimal trajectories, $x^*,p^*$ Pontryagin's
+Maximum Principle is satisfied, $x,p$ form a Hamiltonian Dynamical System and
+the Hamiltonian is an integral of motion - $H = \const$. Thus along optimal
+trajectories the full time derivative of $H$ is zero, $d_t H=0$. Thus we can
+differentiate $H$ until $\a$ props up again and then set the resulting
+expression to zero to obtain an equation for $\a$. 
+
+But is there an analogue to this in the Stochastic Case?
+
+For our very simple problem with no running costs, the stochastic Hamiltonian
+is simply:
+$$
+H(x,p,q) = \inf_{\a} \left\{\tfrac{\b^2}{2} q +
+(\a(t) - x) p \right\}
+$$
+
+
+\bibliographystyle{plain}
+\bibliography{library,local}
+% \bibliography{local}
+
+\end{document}

@@ -1,0 +1,2 @@
+\begin{tabular}{l|p{5cm} p{5cm} } 
+Control Law &Mean Squared Spike-Time Deviation (Accurate)&  Mean Squared Spike-Time Deviation (Misspecified) \\ \hline Deterministic & 1.134 & 1.383 \\  Open-Loop & 0.404 & 0.829 \\  Closed-Loop & 0.361 & 0.798 \\ \hline\end{tabular}
