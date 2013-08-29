@@ -1,9 +1,9 @@
-% \documentclass[12pt]{iopart}
-\documentclass{article}
+\documentclass[12pt]{iopart}
+%\documentclass{article}
 
 \usepackage{amsmath}
 \usepackage{amscd}
-\usepackage{amssymb}
+\usepackage{amssymb} 
 \usepackage{amsfonts} 
 \usepackage{amsthm}
 \usepackage{amsfonts}
@@ -34,12 +34,13 @@
 \usepackage{aviolov_style}
 \usepackage{local_style}
 
+\usepackage{iopams}
 
-\newtheorem{thm}{Theorem}[section]
-\newtheorem{lemma}{Theorem}[thm]
+% \newtheorem{thm}{Theorem}[section]
+% \newtheorem{lemma}{Theorem}[thm]
 % \theoremstyle{definition}
-\newtheorem{ex}{Example}[thm]
-\newtheorem{defn}{Definition}[thm]
+% \newtheorem{ex}{Example}[thm]
+% \newtheorem{defn}{Definition}[thm]
 
 % \def\includegraphic{}
 % \def\includegraphics{}
@@ -47,62 +48,58 @@
 \begin{document} 
 
 
-
-\title{Stochastic Optimal Control of Single Neuron Spike Trains
+\title{Stochastic Optimal Control of Single Neuron Spike Trains}
+\author{Alexandre Iolov$^1$, Susanne Ditlevsen$^2$, Andr\'e Longtin$^1$
+		}	
+\address{%
+     (1) Department of Mathematics and Statistics, University of Ottawa, Ottawa,
+    Canada
 \\
----
-\vskip5pt
-Draft
+    (2) Department of Mathematical Sciences, University of Copenhagen,
+Copenhagen, Denmark
 }
-\author{Alexandre Iolov, Susanne Ditlevsen, Andr\'e Longtin,
-		}		
+\ead{aiolo040@uottawa.ca}			
 % \address{Department of Mathematics and Statistics, University of Ottawa, Ottawa, Canada 
 % \\ Department of Mathematical Sciences, University of Copenhagen, Copenhagen,
 % Denmark }
 % \ead{$<$\href{mailto:aiolo040@uottawa.ca}
 % 		{aiolo040 at uottawa dot ca}$>$}
 
-\date{\today}
+% \date{\today}
+
+\begin{abstract}
+
+{\em Objective.} External control of exact spike timings in single neurons is
+important for basic understanding of neuronal activity, and has potential in
+brain-machine interfaces, for improving neural prostheses, and in medical
+applications related to neuronal disorders, such as Parkinson's disease or
+epilepsy. The goal of this paper is the design of optimal controlled electrical
+stimulation patterns to a cell to achieve a target spike train under
+physiological constraints not to damage tissue and minimize possible side
+effects. {\em Approach.} We pose an optimal control problem to precisely specify
+the spike timing in a noisy leaky integrate-and-fire model of a neuron. In
+particular, we allow for the noise to be of arbitrary intensity. The optimal
+control problem is solved using Dynamic Programming if the controller has access
+to the voltage (closed-loop control) and using a Maximum Principle for the
+transition density if the controller only has access to the spike timings (open
+loop control). {\em Main results.} We have developed a stochastic optimal
+control scheme to obtain precise spike timings, which is not limited by the
+intensity of the noise in the system. Given this scope, the numerical demands
+are non-trivial, but simulations show that the algorithms are potentially
+feasible. It however remains to see if they can be successfully applied in a
+real-time experimental setting. Furthermore, we show how wrong the control
+strategy can perform if we assume that the noise is negligible. {\em
+Significance.} More precise targeting and control of neural activity to achieve
+optimal performance in a noisy environment, in which most neurons are embedded,
+have great potential in health care. The main contribution is the online
+feedback control of a noisy system through modulation of the input, taking into
+account physiological constraints on the control, as well as incurred costs to
+diminish adverse effects.
+
+\end{abstract}
+% \tableofcontents MSC KEYS: 49N90 90C39 93E20 93C20 93C95
 
 \maketitle
-
-
-
-
-\abstract{
-{\em Objective.} External control of exact spike timings in single neurons is
-important for basic understanding of neuronal activity, and has
-potential for improving neural prostheses and in medical applications
-related to neuronal disorders, such as Parkinson's disease or epilepsy.
-The goal of this paper is the design of optimal controlled
-electrical stimulation patterns to a cell to achieve a target
-spike train under physiological constraints not to damage tissue and
-minimize possible side effects.
-{\em Approach.} We pose an optimal control problem to precisely specify
-the spike timing in a noisy leaky integrate-and-fire model of a
-neuron. In particular, we allow for the noise to be of arbitrary intensity. The optimal control problem is solved using Dynamic Programming if the controller has access to the voltage (closed-loop control) and using a Maximum Principle for the transition density if the controller only has access to the spike timings (open loop
-control).
-{\em Main results.} We have developed a stochastic optimal control
-scheme to obtain precise spike timings, which is not limited
-by the intensity of the noise in the system. Given this scope, the
-numerical demands are non-trivial, but simulations show that the
-algorithms are potentially feasible. It however remains to see if
-they can be successfully applied in a real-time experimental setting.
-Furthermore, we show how wrong the control strategy can perform if we
-assume that the noise is negligible.
-{\em Significance.} More precise targeting and control of neural
-activity to achieve optimal performance in a noisy environment, in
-which most neurons are embedded, have great potential in health
-care. The main contribution is the online feedback control of a noisy
-system through
-modulation of the input, taking into account physiological constraints
-on the control, as well as incurred costs to diminish adverse effects.
-}
-
-\tableofcontents
-
-
-MSC KEYS: 49N90 90C39 93E20 93C20 93C95
 
 \section{Introduction}
 Manipulation of individual neurons through external electrical
@@ -144,25 +141,19 @@ difference between the realized spike time, $T_{sp}$ and the desired, $t^*$.
 Moehlis et al. \cite{Moehlis2006} work with a Phase Response Model to obtain
 spikes at exact times, while keeping the root mean square of the input to a
 minimum. A similar approach is taken in \cite{Dasanayake2011}. They do not
-consider noise, though. In \cite{Nabi2013}, the methods are implemented on brain
-slices of pyramidal neurons of rat hippocampus. [[[ALEX, Is it closed- or open
-loop? Could you SHORTLY describe the difference of what they do and what we
-do?]]] \{ALEX: They use Phase Response Curves, assuming that a spike coincides
-with $\th=0$; no noise, Pontryagin Maximum Principle, solved numerically $=>$
-open-loop. Short Description: Since they do not consider noise, it is
-straight-forward to make the neuron spike when you want it, and in fact that can
-be done in many ways. Thus their optimization reduces to finding the way to make
-the neuron spike at a pre-specified time, using least energy (the integral of
-$u^2$.\}. While the Phase Response Curve Model is a parsimonious and effective
-way to describe a neuron's response to a stimulus, it is only valid in the
-supra-threshold regime, when the unstimulated neuron is periodically spiking.
-In \cite{Feng2003} they use a leaky integrate-and-fire model and also
-use open-loop control, but to obtain exact spike timings, they choose an
-objective of minimizing the variance of the membrane potential at the desired
-spike time, while forcing the mean of the membrane potential at this time point
-to equal the threshold. This provides exact solutions since it does not involve
-first-passage times, but has the drawback of getting a non-negligible
-probability of being way-off the objective.
+consider noise, though, and only work with open-loop control. In
+\cite{Nabi2013}, the methods are implemented on brain slices of pyramidal
+neurons of rat hippocampus. While the
+Phase Response Curve Model is a parsimonious and effective way to describe a
+neuron's response to a stimulus, it is only valid in the supra-threshold regime,
+where the unstimulated neuron is periodically spiking. In \cite{Feng2003} they
+use a leaky integrate-and-fire model and open-loop control. To
+obtain a given spike time, they choose an objective of minimizing the
+variance of the membrane potential at the desired spike time, while forcing the mean of
+the membrane potential at this time point to equal the threshold. This provides
+exact solutions since it does not involve first-passage times, but has the
+drawback that there is a non-negligible probability that the obtained
+spike time will be far from the desired spike time. 
 
 Our objective of imposing a certain timing sequence of the spike train using an
 externally applied control is obtained in both the closed- and
@@ -170,27 +161,10 @@ open-loop setting, and we specifically include the noise in the
 calculations of the controls. We restrict the controlled input to stay
 within pre-specified bounds, and also include a cost function to
 minimize intervention.
-Our main contributions are... (((what we have done which has not been
-done before, numerical merits...)))
-\{ALEX: Basically, we deal with a significant noise component. Everything
-else follows, i.e. the objective only makes sense if the ISI is a random variable.
-The PDEs (HJB and Max Principle) only occur because of the noise
-component, o/w we would have ODEs. The numerical schemes are simple given the
-PDEs, we just use the Crank-Nicholson method for the PDEs and a basic
-gradient-descent for the optimization in the open-loop case. The numerics take a
-non-trivial time to run - hard to see them coming down to real-time, i.e.
-10-20 ms, \ldots but possible. We also explore a wide spectrum of parameter
-values, in particular we do  not restrict our attention to the
-autonomously-spiking, supra-threshold regime.\}
-
-[[[Susanne, we should mention Whittle \cite{Whittle1996}, but here, or together
-with other monographs on optimal control?]]] \{ALEX: Indeed we should mention
-Whittle, in particular mention that he discusses analytically the problem in the
-closed-loop case (only), but not the open-loop case. He does not provide
-numerics in either case. I would refrain from citing other books on
-stochastic optimal control, here. Books commonly cited are
-\cite{Fleming1975,Krylov2008} and the chapter on HJB equation in Oksendal,
-\cite{Oksendal2007}, some of them are cited in later sections\ldots\}
+Our main contributions are that we specifically allow for a non-negligible
+noise component in the neural activity when calculating the control, and
+consider both open- and closed-loop controls. In particular we do not
+restrict our attention to the autonomously-spiking, supra-threshold regime. 
 
 The paper is structured as follows: First we describe the neuron model and
 formalize the control objective. Then we describe a feedback-based solution,
@@ -204,26 +178,25 @@ the stochastic input to the neuron.
 A basic but useful model for the neural membrane potential evolution is the
 noisy leaky-integrate-and-fire model:
 \begin{equation}
-\begin{gathered} 
+\begin{gathered}
 dX_s = \left(\Iext(t) - \frac{X_s}{\tc} \right) \intd{s} + \b \intd{W_s},
 \\
 X(0) = 0,
 \\
-X(\ts) = \xth \implies   
+X(\ts) = \xth \implies
 \begin{cases}
-X(\ts^+) = 0 &  
+X(\ts^+) = 0 &
 \end{cases}
 \end{gathered}
 \label{eq:X_evolution_uo}
 \end{equation}
-Here $X$ represents the membrane electric potential which tries to revert to $0$
-with a time-const of $\tc$, $dW$ is a Brownian motion increment scaled by $\b$
-and $\Iext(t)$ is the deterministic external input to the cell. Having last
+Here $X$ represents the membrane electric potential which decays to $0$
+with a time constant of $\tc$, $dW$ is a Brownian motion increment scaled by
+$\b$ and $\Iext(t)$ is the deterministic external input to the cell. Having last
 spiked at time $0$, the potential hits $\xth$ at some time $\ts$, the potential
-resets to $0$ and we start all over again. We write $\ts^+$ in the formula for
-the reset since we are working in continuous time, i.e.\ it is really the
-voltage's limit from the right at $\ts$ that is 0. For our purposes, we will
-always have that the threshold is set to one, $\xth = 1$.
+resets to $0$ and the process starts all over again. 
+We write $\ts^+$ for the voltage's limit from the right at $\ts$.
+Throughout the paper the threshold is set to one, $\xth = 1$.
 
 Suppose that we have some control over the external current such that it can be
 decomposed as
@@ -232,13 +205,13 @@ decomposed as
 \label{eq:current_mu_alpha}
 \end{equation}
 where $\m$ is an uncontrollable, but constant part of the external current and
-$\a(t)$ is controllable, i.e.\ it can be chosen to achieve some goal. 
-A natural goal is to attempt to control the spike time, $\ts$. 
-That is we would like to ask how do we choose $\a(t)$ such that $\ts = \T$.
+$\a(t)$ is controllable, i.e.\ it can be chosen to achieve some goal.
+A natural goal is to attempt to control the spike time, $\ts$.
+That is how do we choose $\a(t)$ such that $\ts = \T$.
 A natural optimal control objective to achieve this is the least squares solution
 \begin{equation}
 \a(t) = \argmin_{\a(t)} \{\, \Exp[(\ts- \T)^2] \,\}
-\label{eq:OC_LS_variance}   
+\label{eq:OC_LS_variance}
 \end{equation}
 where expectation is taken with respect to the distribution of the trajectories
 of $X_t$.
@@ -246,68 +219,64 @@ of $X_t$.
 Often the control has certain constraints. The most common are simple box
 constraints:
 \begin{equation}
-\a(t) \in [\amin, \amax] \quad \forall t
+\a(t) \in [\amin, \amax] \quad \forall t.
 \label{eq:bound_constraints_alpha}
 \end{equation}
 
 % \subsection{Optimal Control Formulation}
 In addition to \cref{eq:OC_LS_variance}, we will also add to our objective a
 running cost based on the control. This regularizes the problem eliminating the
-subtleties of singular-control situations and it might be argued appropriate to
-avoid excessive control. WE SHOULD DISCCUSS THIS IN GREATER DETAIL, BUT PERHAPS
-LATER. (ALEX:\cite{Ahmadian2011} state that they impose a similar control
-penalty to avoid excessive charge building up on the cell.)
+subtleties of singular-control situations and it serves to avoid excessive
+control as well as to avoid excessive charge building up on the cell.
 
 So we seek an optimal control, $\a^*$, that solves
 \begin{align}
-J[\a(\cdot)] =&  
+J[\a(\cdot)] =&
 \Exp\left[
 \e \int_0^\ts  \a^2(s) \intd{s}
-+  
-(\ts - \T \big)^2 \right]  
-\label{eq:OC_LS_variance_energy}   
++
+(\ts - \T \big)^2 \right]
+\label{eq:OC_LS_variance_energy}
 \\ \notag
-\a^*(\cdot) =& \argmin_{\a(\cdot)} J[\a(\cdot)]. 
+\a^*(\cdot) =& \argmin_{\a(\cdot)} J[\a(\cdot)].
 \end{align}
-where $\e$ measure how much weight we put on minimizing the energy expenditure.
-If $\e = 0$, then we do not care at all about the expended
-energy.
+where $\e$ measures how much weight we put on minimizing the energy cost.
+If $\e = 0$, then we do not care at all about the expended cost.
 
-It will often be the case that we write $\a$ and mean either a function or a
-value of that function at a particular time. And that this function could be
+It will often be the case that $\a$ means either a function or a
+value of that function at a particular time. This function could be
 random, i.e.\ a stochastic process. Since $\a$ is used to control the behaviour
 of $X$, it will be at least measurable with respect to the filtration of $X$,
-see \cite{Krylov2008}. We will try to make clear below when we are refering to
-$\a$ as a stochastic process and when we are merely refering to its particular
+see \cite{Oksendal2007} for the details. We will try to make clear below when we
+are refering to $\a$ as a stochastic process and when we are merely refering to its particular
 value at some time. For example, in \cref{eq:OC_LS_variance_energy}, $\a(\cdot)$
 refers to the function, while $\a(s)$ refers to that function's value, possibly
 random, at time $s$.
-  
+
 We will consider two control contexts -- {\sl closed-loop} and  {\sl open-loop}
 control. In closed-loop control, the value of $X_t$ at time $t$ is observable
 and can be used in determining the control. In open-loop control only the spike
-times are observable. In the closed-loop context, we might better write the
-control as $$\a = \a(x,t)$$ to indicate its dependence on $X_t$ and to express
-that it will be updated based on the time-course of $X$. 
-In the open-loop context, we would instead write $$\a = \a(t)$$ to indicate that
-$\a(\cdot)$ is decided for all times at time 0. 
-The techniques used in the two scenarios will be different. For the closed-loop
-scenario we will use Dynamic Programing, \cite{Fleming1975}, in order to obtain
-the optimal control, while for the open-loop scenario we will use a form of the
+times are observable. In the closed-loop context, we write the control as $$\a =
+\a(x,t)$$ to indicate its dependence on $X_t$ and to express that it will be
+updated based on the time-course of $X$. In the open-loop context, we write $$\a
+= \a(t)$$ to indicate that $\a(\cdot)$ is decided for all times at time 0. The
+techniques used to obtain the optimal controls in the two scenarios will be
+different. For the closed-loop scenario we use Dynamic Programing,
+see \cite{Fleming1975}, while for the open-loop scenario we use a form of the
 Maximum Principle applied on the transition density of the controlled process,
-\cite{Ahmed1981,Borzi2012}.
+see \cite{Borzi2012}.
 
 Crucially, we assume that the model parameters, $\m,\tc,\b$ in
-\cref{eq:X_evolution_uo} are known. 
+\cref{eq:X_evolution_uo} are known. This is a strong assumption and will be
+discussed later. 
 
 \subsection{Parameter Regimes}
 Different  parameter regimes can be envisioned given \cref{eq:X_evolution_uo},
 depending on whether the noise intensity, $\b$, is
 relatively high or low, and whether the external, uncontrollable bias current,
-$\m$, induces spikes in the absence of noise or not.
-
+$\m$, induces spikes in the absence of noise or not. 
 Spikes will occur in the absence of noise, if and only
-if $$ \m > \frac 1\tc,$$ which is called the supra-threshold regime. When $\m
+if $ \m > \frac 1\tc,$ which is called the supra-threshold regime. When $\m
 \leq 1/\tc$, the regime is called the sub-threshold regime.
 In addition we will impose two values of $\b$, which we
 will call high-noise and low-noise, respectively.
@@ -319,7 +288,7 @@ visualize a single path for each regime in \cref{fig:regime_path_examples}.
 \backslashbox{$\m$}{$\b$}
 & $1.5$ & $0.3$ \\
 \hline
-$1.5 / \tc $ &Supra-threshold-High-noise & Supra-threshold-Low-noise \\ 
+$1.5 / \tc $ &Supra-threshold-High-noise & Supra-threshold-Low-noise \\
 \hline
 $0.1 / \tc$   &Sub-threshold-High-noise & Sub-threshold-Low-noise \\
 \hline
@@ -330,48 +299,45 @@ experiments below, we use $\tc = 0.5$}
 \end{table}
 %\usepackage{graphics} is needed for \includegraphics
 \begin{figure}[htp]
-\begin{center} 
+\begin{center}
   \includegraphics[width=0.99\textwidth]{Figs/PathSimulator/path_T=14_combined.pdf}
   \caption[labelInTOC]{Example Trajectories from \cref{eq:X_evolution_uo}
   using the parameter values from \cref{tab:regimes}. A)
   Supra-Threshold-High-Noise B) Supra-Threshold-Low-Noise C) Sub-Threshold-High-Noise D) Sub-Threshold-Low-Noise}
-  \label{fig:regime_path_examples} 
-\end{center} 
-\end{figure} 
+  \label{fig:regime_path_examples}
+\end{center}
+\end{figure}
 
-\section{Closed-Loop Solution - Dynamic Programing} 
+\section{Closed-Loop Solution - Dynamic Programing}
 We now detail the Dynamic Programing approach to obtaining a feedback-optimal
 control. What this amounts to is that the controller can be continuously updated
 depending on the realization of the stochastic process, $X_t$.
 
 Given a time $t$ and a realized voltage value $X_t = x$, let $\trem$ be the
-(unknown) remaining time to spike, $\trem = \ts - t$. 
-Starting from an arbitrary $t, x$, our remaining-cost
-objective, $J[\a(\cdot); x,t]$, will be
+(unknown) remaining time to spike, $\trem = \ts - t$. Starting from an arbitrary
+$t, x$, our remaining-cost objective, $J[\a(\cdot); x,t]$, will be
 \begin{equation}
-J[\a(\cdot); x,t]  = 
+J[\a(\cdot); x,t]  =
 \Exp\left[
-\big(\trem - (\T-t) \big)^2 
+\big(\trem - (\T-t) \big)^2
 +
 \e \int_t^\ts  \a^2(s) \intd{s}
 \,\Big|\, X_t = x
-\right] 
+\right]
 \label{eq:OC_LS_cost_to_go}
 \end{equation}
 i.e.\ if time $t$ has elapsed without a spike, we now want to minimize
 the difference between $\t = \ts - t$ and ($\T-t$), given the current state $x$.
-Recall that in the closed-loop scenario, we assume that the value of $x = X_t$
-is known to the controller.
+Recall that in the closed-loop scenario, we assume that the value of $X_t$
+is known to the controller. A similar problem is discussed analytically at
+length in the book on optimal control by Peter Whittle, \cite{Whittle1996},
+although there is no discussion there of the numerics required to solve it. 
 
 \subsection{Hamilton-Jacobi-Bellman equation}
 The Hamilton-Jacobi-Bellman (HJB) equation,
-see \cite{Fleming1975,Evansb,Krylov2008}, \{ALEX: Should we also cite
-Moehlis' papers that use/discuss HJB \cite{Nabi2013a,Danzl2009}???\}
-associated with \cref{eq:OC_LS_cost_to_go} is obtained as follows. We introduce the value function, $\v(x,t)$
-% \footnote{Traditionally, the value function is denoted as $v$. We
-% use $\v$ since we are working in a neural context, where $v$ is so often used
-% to denote a voltage}
-:
+see \cite{Fleming1975,Whittle1996} or \cite{Danzl2009,Nabi2013a} for a neuroscience
+context, associated with
+\cref{eq:OC_LS_cost_to_go} is obtained as follows. We introduce the value function, $\v(x,t)$:
 \begin{align}
 \v(x,t) =&
  \min_{\a(\cdot)_{s \geq t}}
@@ -381,7 +347,7 @@ associated with \cref{eq:OC_LS_cost_to_go} is obtained as follows. We introduce 
 =&
 \min_{\a(\cdot)_{s \geq t}}
 \Exp\left[
-\big(\trem - (\T-t) \big)^2 
+\big(\trem - (\T-t) \big)^2
 +
 \e \int_t^\ts  \a^2(s) \intd{s}
 \,\Big|\,X_t = x
@@ -389,8 +355,7 @@ associated with \cref{eq:OC_LS_cost_to_go} is obtained as follows. We introduce 
 \label{eq:OC_LS_mean_value}
 \end{align}
 
-Then $\v$ satisfies the following HJB partial differential equation (PDE) (see
-\cite{Fleming1975,Evansb,Krylov2008} for details):
+Then $\v$ satisfies the following HJB partial differential equation (PDE):
 \begin{equation}
 \begin{gathered}
 \di_t \v(x,t) + \tfrac{\b^2}{2} \di_x^2 \v(x,t) + \\
@@ -402,9 +367,9 @@ Then $\v$ satisfies the following HJB partial differential equation (PDE) (see
 \end{equation}
 The special feature of \cref{eq:OC_LS_mean_HJB} in contrast to a generic
 parabolic PDE is that it contains an embedded optimisation that depends on the
-solution, $\v$. That is for each $x,t$ in the computational domain,
-$\a$ is chosen as to minimize $\{\e \a^2 + \left(\m + \a - \tfrac{x}{\tc}\right) \di_x \v \}$. 
-Here the we can solve for the optimal control, $\a^*(x,t)$ analytically as:
+solution, $\v$. For each $x,t$ in the computational domain,
+$\a$ is chosen as to minimize $\{\e \a^2 + \left(\m + \a - \tfrac{x}{\tc}\right) \di_x \v \}$.
+Here we can solve for the optimal control, $\a^*(x,t)$ analytically as:
 \begin{align}
 \a^*(x,t)  =& \argmin_{\a \in [\amin, \amax]}\big\{\e \a^2 + (\m + \a-\tfrac{x}{\tc}) \di_x\v\big\}
 \notag
@@ -421,34 +386,31 @@ With this the HJB PDE becomes
 \label{eq:OC_LS_mean_HJB_bounded_control}
 \end{equation}
 
-Now, we need to consider boundary conditions (BCs) for $\v$. If $X_t = \xth$
-then we have a spike now and we know that $\ts = t$. Thus
-$$ \v(\xth,t) =
-(t-\T)^2.$$ 
-At the threshold, the value function equals the squared difference
-between the desired spike time and the realized one.
-Now for $x \ll .0$, we can assume that $\v$ is not
+We need to consider boundary conditions (BCs) for $\v$. If $X_t = \xth$ then we
+have a spike now and $\ts = t$. Thus $$ \v(\xth,t) = (t-\T)^2.$$ At the
+threshold, the value function equals the squared difference between the desired
+spike time and the realized one. For $x \ll 0$, we assume that $\v$ is not
 significantly affected by the change in $x$, i.e.\ that $$ \di_x \v(\xmin, t) =
 0 $$ for some lower boundary $\xmin$. Such a boundary condition will be
-justified if we impose artificial reflecting boundaries for the diffusion at $\xmin$. So we need to
-determine for which $\xmin$ is a reflecting boundary consistent with the
-dynamics. For example, we can take $\xmin$ to be two standard deviations
-below the mean of the stationary distribution of the maximally
-inhibited, $\a=\amin$, \cref{eq:current_mu_alpha}. That is we set $\xmin =
-\tc(\mu + \amin) - 2 \b / \sqrt{\tc/2}$. In fact, we further enforce that
-$\xmin \leq -0.5$.
+justified if we impose artificial reflecting boundaries for the diffusion at
+$\xmin$. So we need to determine for which $\xmin$ is a reflecting boundary
+consistent with the dynamics. For example, we can take $\xmin$ to be two
+standard deviations below the mean of the stationary distribution of the
+maximally inhibited, $\a=\amin$, \cref{eq:current_mu_alpha}. That is we set
+$\xmin = \tc(\mu + \amin) - 2 \b / \sqrt{\tc/2}$. We further enforce
+that $\xmin \leq -0.5$.
 % Ooops, we need $\di_x\v\neq 0$ and here we are setting $\di_x\v= 0$ in one of
 % the BCs\ldots oh well.
 
-Now we come to the Terminal Conditions (TCs) for $\v$. The idea is simple:
-if we reach $\T$ without having spiked we apply maximum control in the
-positive direction, i.e.\ $$t>T \implies \a(t) = \amax$$ Thus: 
+To determine the Terminal Conditions (TCs) for $\v$, the idea is
+simple: if we reach $\T$ without having spiked we apply maximum control in the
+positive direction, i.e.\ $$t>T \implies \a(t) = \amax$$ Thus:
 \begin{equation}\v(x,\T) =
 \Exp \Big[\trem^2 \,\Big|\, X_\T = x, \a(t) = \amax \Big].
 \label{eq:valuefun_TCs}
-\end{equation} 
+\end{equation}
 Note that we are making an approximation here
-- that is we are ignoring the energy term, $\eps u^2$ in the objective for
+- we are ignoring the energy term, $\eps u^2$, in the objective for
 $t>T$. Naturally, this approximation is ever more accurate for $\eps \ll 1$.
 We discuss in more detail the validity of the approximation in
 \cref{sec:effect_of_eps}.
@@ -460,11 +422,11 @@ repeatedly so we will give it a special name.
 \begin{equation}
 \Ttwo(x) := \Exp \Big[\trem^2 \,\Big|\, X_\T = x, \a(t) = \amax \Big].
 \label{eq:Trem_squared}
-\end{equation} 
+\end{equation}
 $\Ttwo$ is the second moment of the remaining time to reach the
 threshold starting at $X_\t = x$ and applying $\amax$ throughout. This quantity can be found
 easily for all $x$ in the domain by solving a stationary backward Kolmogorov
-equation. We show the details in \cref{sec:valuefun_TCs}.
+equation. We show the details in \ref{sec:valuefun_TCs}.
 
 Thus, we restate the HJB equation in its fully specified form:
 \begin{equation}
@@ -482,7 +444,7 @@ Thus, we restate the HJB equation in its fully specified form:
 \di_x \v(\xmin, t)  = 0  \quad &\textrm{lower BC}
 \\
 \v(x,\T)  =
-% \Exp \Big[\trem^2 \,\Big|\, X_\T = x, \a(t) = \amax \Big] 
+% \Exp \Big[\trem^2 \,\Big|\, X_\T = x, \a(t) = \amax \Big]
 % \Exp[\t^2|x, \amax]  \quad
 \Ttwo(x)
 \,& \textrm{TC}
@@ -493,30 +455,32 @@ Thus, we restate the HJB equation in its fully specified form:
 We are solving $\v(x,t)$ over the domain $[\xmin, \xth] \times [0,T]$.
 
 \subsection{The numerical method for the HJB equation}
+
 We now have a PDE for $\v$ and an algorithm for computing all the BCs and TCs of
-this PDE. It is time to discuss the numerical method for solving \cref{eq:OC_LS_HJB_full}. Since we are in 1-d the simplest thing to do is try a
-centred Finite Difference scheme using Crank-Nicholson to step in time.
-Although, it might become necessary, we do not upwind the first order
-derivatives for now. Also to resolve the non-linearity, $(\di_x\v)^2$, in the
-PDE, we treat it as a mixed implicit-explicit term
-$$(\di_x \v(x,t_k))^2 = \di_x
-\v(x,t_k) \cdot \di_x \v(x,t_k) \approx \underbrace{\di_x \v(x,t_k)}_{\textrm{implicit}}
-\cdot \underbrace{\di_x\v(x,t_{k+1})}_{\textrm{explicit}}.$$ Note that the
-implicit term is in the previous time $t_k$ instead of, as is conventional,
-the next $t_{k+1}$, because we are solving for $\v$ {\sl backwards} in time. 
-TODO: Give justification for this trick.
+this PDE. It is time to discuss the numerical method for solving
+\cref{eq:OC_LS_HJB_full}. Since it is one-dimensional, it is straight forward to
+apply the standard centred finite difference using the Crank-Nicholson scheme to
+step in time. We have not found it necessary to upwind the first order
+derivatives for the regimes we have explored. To resolve the non-linearity,
+$(\di_x\v)^2$, in the PDE, we treat it as a mixed implicit-explicit term
+$$(\di_x \v(x,t_k))^2 = \di_x \v(x,t_k) \cdot \di_x \v(x,t_k) \approx
+\underbrace{\di_x \v(x,t_k)}_{\textrm{implicit}} \cdot
+\underbrace{\di_x\v(x,t_{k+1})}_{\textrm{explicit}}.$$ Note that the implicit
+term is in the previous time $t_k$ instead of, as is conventional, the next
+$t_{k+1}$, because we are solving for $\v$ {\sl backwards} in time.
 
 The numerical scheme is implemented in Python, using the Scipy/Numpy library,
-\cite{Scipy}. 
-
-TODO(ALEX): Mention time- space- discretization
+\cite{Scipy}. For the discretization in time and space, we choose $\Delta x$ and
+$\Delta t$ in relation to the parameter regimes. for example in the
+Supra-Threshold Low-Noise regime, we have $\Delta x = 0.0043$ and $\Delta t =
+0.0012$. We consider these to be a fairly fine discretization. 
 
 We next demonstrate solutions for the value function and the associated
 control law for a parameter set from each regime in \cref{tab:regimes}.
 
 \subsection{Solutions of the HJB equation}
-We set $\T=1.5$ and $\eps = .001$, so that the primary focus is the accurate
-spiking and energy minimization considerations are secondary. 
+We set $\T=1.5$ and $\eps = 0.001$, so that the primary focus is the accurate
+spiking and energy minimization considerations are secondary.
 
 In \cref{fig:HJB_4regimes_value_control_cuts}, we depict three snapshots
 in time of the value function and the control, $\v$ and $\a$, at $t = [0,\T/2,
@@ -530,31 +494,34 @@ the solution to \cref{eq:OC_LS_HJB_full}, for each of the parameter regimes.
   \caption[labelInTOC]{Snapshots of the value function, $\v$, on the left and on
   the optimal control, $\a$, on the right for $t$ fixed, at the start (blue),
   mid-point (green) and end-point (red), for each of the four regimes. The desired spike time is set to $\T=1.5$, the energy penalty, $\eps
-  = .001$. The control bounds are $\a \in [-2,2]$. Note that the green and blue
+  = 0.001$. The control bounds are $\a \in [-2,2]$. Note that the green and blue
   curves in E) are lying on top of each other for all $x$.
   \\
-  A,E) Supra-Threshold-High-Noise B,F) Supra-Threshold-Low-Noise 
-  C,G) Sub-Threshold-High-Noise D,H) Sub-Threshold-Low-Noise
-  }   
+  A,E) Supra-Threshold-Low-Noise
+  B,F) Supra-Threshold-High-Noise
+  C,G) Sub-Threshold-Low-Noise
+  D,H) Sub-Threshold-High-Noise
+  }
 \label{fig:HJB_4regimes_value_control_cuts}
 \end{center}
-\end{figure}  
-% THE SURFS:    
-\begin{figure}[h!]  
+\end{figure}
+% THE SURFS:
+\begin{figure}[h!]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{Figs/HJB/Regimes_valuesurf.pdf}
 \caption{The numerical solution for the value function $\v(x,t)$ HJB PDE,
-\cref{eq:OC_LS_HJB_full}, for the four different parameter regimes. Recall that
-the solution is solved backwards in time.
-The desired spike time is set to $\T=1.5$.  
-The control bounds are $\a \in [-2,2]$. 
+\cref{eq:OC_LS_HJB_full}, for the four different parameter regimes.
+The desired spike time is set to $\T=1.5$.
+The control bounds are $\a \in [-2,2]$.
 The contours for fixed $t$ plotted in thick correspond to the graphs in \cref{fig:HJB_4regimes_value_control_cuts}.
-\\   
-A) Supra-Threshold-High-Noise B) Supra-Threshold-Low-Noise 
-C) Sub-Threshold-High-Noise   D) Sub-Threshold-Low-Noise  }
+\\
+A) Supra-Threshold-Low-Noise
+B) Supra-Threshold-High-Noise
+C) Sub-Threshold-Low-Noise
+D) Sub-Threshold-High-Noise  }
 \label{fig:HJB_4regimes_value_surf}
-\end{center} 
-\end{figure}  
+\end{center}
+\end{figure}
 
 Let us discuss the most salient features in
 \cref{fig:HJB_4regimes_value_surf,fig:HJB_4regimes_value_control_cuts}. Recall
@@ -562,7 +529,7 @@ that lower values for the value function, $\v(x,t)$, are preferred, since we are
 minimizing. We see the same general shape in all four space-time surface plots
 of the value function in \cref{fig:HJB_4regimes_value_surf}. At the end of the
 interval, $\v(x,\T)$ is monotonically decreasing in $x$, which is to be expected
-given its terminal condition in \cref{eq:valuefun_TCs}. That is the lower the
+given its terminal condition in \cref{eq:valuefun_TCs}. That is, the lower the
 value of $X_\T$ the more on average will we have to wait for the spike to occur.
 % This same basic shape represents the idea that we would like to be close to
 % the threshold, $x = 1$, near the end of the interval when $t \approx \T$, but
@@ -594,28 +561,27 @@ interval, the control takes its maximum value, $\a(x,\T) = \amax$ for all $x$,
 i.e.\ it gives the maximum available push for the neuron to spike. This is
 implied \cref{eq:valuefun_TCs}. As we go back in time, however, the control $\a$
 decreases for $x \ll \xth$, and it becomes negative, i.e.\ inhibitory for $x
-\lesssim \xth$. That is intuitively consistent with the problem objective - for
-$t<\T$, we want to bring $X_t$ closer to the threshold, but not too close, to
-avoid early spiking!
+\lesssim \xth$. That is intuitively consistent with the problem objective. 
+For $t<\T$, we want to bring $X_t$ closer to the threshold, but not too close, to
+avoid early spiking.
 
-Now let us consider the differences between the individual regimes, i.e.\ the
+Now consider the differences between the individual regimes, i.e.\ the
 effect of changing the bias and the noise intensity, $\m,\b$. All things being
 equal, the effect of increasing the noise intensity, $\b$, is to lift the value
 function, i.e.\ to make our objective worse, at the beginning of the interval
-and to decrease it at the end. This is to be expected since we are attempting
-to minimize the variance in the spike time and without noise there would be no
-variance at all. However, at the end of the interval, noise only helps with the
-spiking, since now we are only interested in spiking as soon as possible, and a
-higher noise intensity, will tend to decrease the spike time on average.
-Increasing $\b$ also has the effect of increasing the size of the boundary layer
-near $\xth$, where the value function rises steeply. I.e.\ for small $\b$ that
-layer is small since the risk of spiking early is only significant close to
-the threshold. For larger $\b$ this layer increases, see panels A,C, with a thin
-layer, vs.\ B,D, with a thicker layer, in
-\cref{fig:HJB_4regimes_value_control_cuts}. Similarly, increasing the bias,
-$\mu$, tends to decrease the value function, especially at the end since that
-has the unequivocal effect of preventing late spikes.
-\clearpage
+and to decrease it at the end. This is to be expected since we are attempting to
+minimize the variance in the spike time and without noise there would be no
+variance at all. However, at the end of the interval, noise only helps, since
+now we are only interested in spiking as soon as possible, and a higher noise
+intensity will tend to decrease the spike time on average. Increasing $\b$ also
+has the effect of increasing the size of the boundary layer near $\xth$, where
+the value function rises steeply. I.e.\ for small $\b$ that layer is small since
+the risk of spiking early is only significant close to the threshold. For larger
+$\b$ this layer increases, see panels A,C, with a thin layer, vs.\ B,D, with a
+thicker layer, in \cref{fig:HJB_4regimes_value_control_cuts}. Similarly,
+increasing the bias, $\mu$, tends to decrease the value function, especially at
+the end since that has the unequivocal effect of preventing late spikes.
+% \clearpage
 
 \section{Open-loop Stochastic Control}
 When the value of $X_t$ is unobservable, the best
@@ -657,7 +623,7 @@ In theory, $\xmin = -\infty$, but in the numerics below we will need to
 truncate it to some finite value, exactly as in the HJB equation,
 \cref{eq:OC_LS_HJB_full}.
 Note that we write $\a(t)$ here instead of $\a(x,t)$ since we cannot use the
-value of $X_t$ in choosing the optimal control. 
+value of $X_t$ in choosing the optimal control.
 
 The $f$ dynamics can also be written as
 $$
@@ -681,7 +647,7 @@ $$ \L_\a[\cdot] := \di^2_x \Big[\frac{\b^2 }{2} \cdot\Big] -
  differential operator is parametrized by the control, $\a$.
 
 \subsection{Restating the objective in terms of the transition density}
-Let us recall our objective, \cref{eq:OC_LS_variance}: 
+Let us recall our objective, \cref{eq:OC_LS_variance}:
 $$
 J[\a(\cdot)] = \Exp\left[
 (\ts - \T \big)^2
@@ -729,7 +695,7 @@ With that our optimal control $\a^*(\cdot)$ will naturally be found via:
 $$
 \a^*(\cdot) = \argmin_{\a(\cdot)} J[\a(\cdot)]
 $$
- 
+
 \subsection{Optimizing using a Maximum Principle}
 \label{sec:PDE_max_principle_for_pdf}
 By now our stochastic optimal control problem modelled by SDEs
@@ -792,19 +758,19 @@ Finally, we are ready to calculate the open-loop stochastic optimal control for
 the four parameter regimes. The calculated optimal controls for each regime are
 in \cref{fig:FBK_Regimes_cs}. Recall that the optimal control, $\a^*(t)$, is
 open-loop and thus it is only a function of time.
-% \usepackage{graphics} is needed for \includegraphics 
+% \usepackage{graphics} is needed for \includegraphics
 \begin{figure}[htp]
 \begin{center}
-  \includegraphics[width=.99\textwidth]{Figs/FP_Adjoint/Regimes_cs.pdf}  
+  \includegraphics[width=.99\textwidth]{Figs/FP_Adjoint/Regimes_cs.pdf}
   \caption[labelInTOC]{The deterministic optimal controls for each parameter
   regime as functions of time, $t \in [0, \T]$.
   The desired spike time is set to $\T=1.5$, the energy penalty, $\eps
   = .001$ and the bounds are $\a \in [-2,2]$.
-  A) Supra-Threshold-High-Noise B) Supra-Threshold-Low-Noise 
-C) Sub-Threshold-High-Noise   D) Sub-Threshold-Low-Noise  }
-  \label{fig:FBK_Regimes_cs}   
+  A) Supra-Threshold-Low-Noise B) Supra-Threshold-High-Noise
+C) Sub-Threshold-Low-Noise   D) Sub-Threshold-High-Noise  }
+  \label{fig:FBK_Regimes_cs}
 \end{center}
-\end{figure} 
+\end{figure}
 
 Let us discuss the most salient features of the controls calculated in
 \cref{fig:FBK_Regimes_cs}. In general, the strategy is to inhibit the neuron at
@@ -854,7 +820,7 @@ is now the main drive for a spike.
 % \label{fig:FP_adjoint_objective_control_convergence}
 % \end{center}
 % \end{figure}
-% 
+%
 % \begin{table}[h]
 % \centering
 % \begin{tabular}{lc}
@@ -868,7 +834,7 @@ is now the main drive for a spike.
 % expected performance of the stochastic law (last row)}
 % \label{tab:realized_avg_errors_det_vs_stoch}
 % \end{table}
-% 
+%
 % \begin{figure}[h]
 % \begin{center}
 % \subfloat[A]
@@ -906,89 +872,8 @@ is now the main drive for a spike.
 % \end{center}
 % \end{figure}
 
-\clearpage
-\section{Effect of energy penalty}
-\label{sec:effect_of_eps}
-So far we have assumed a low value for the energy penalty parameter,
-$\eps$, in the objective defined in \cref{eq:OC_LS_variance_energy}. Our
-approach has been that we are most concerned with the accurate spiking and that
-penalizing energy is rather intended to regularize the control and avoid
-excessive chattering of the control between its extreme values, than as a goal
-in minimizing energy in its own right. Now, we take some time to explore the
-effect of a higher $\eps$ on the optimal controls. Intuitively, a
-higher value of $\eps$ will tend to bring the optimal control, $\a^*$, closer
-to zero. We make a comparison for the four regimes for both the
-closed-loop control and the open-loop control in
-\cref{fig:HJB_4regimes_control_different_eps,fig:FBK_Regimes_cs_different_es}.
-Indeed, for both the closed-loop and open-loop optimal controls, increasing
-$\eps$ tends to reduce the absolute value of $\a^*(t)$. In particular, for the
-closed-loop control it tends to broaden the area of transition for
-decreasing $x$ when the control swings from its minimal, i.e.\ inhibitory value,
-to its maximal, i.e.\ excitatory value. Similarly for the open-loop control,
-instead of banging from its minimal bound at the beginning of the interval to
-its maximal bound at the end, the optimal control for $\e = .1$ tends to have a
-more mild transition from a slightly inhibitory to slightly excitatory
-values. 
-
-Note however that increasing $\eps$ has an important effect on the validity of
-the approximation, used to form the terminal conditions for
-the value function and the adjoint variable, $\v,p$. We assumed that applying
-$\amax$ is optimal for $t>\T$. This is indeed true in the
-limit $\eps \ra 0$. However, even for a finite value of $\eps$, this may still
-be the optimal thing to do. Indeed, in the original calculations,
-where $\eps=.001$, see the panels on the left in
-\cref{fig:HJB_4regimes_control_different_eps,fig:FBK_Regimes_cs_different_es},
-the so-obtained value function {\sl implied} that $\a(x,\T) = \amax.$. I.e.\ our
-guess that $\a(x, t) = \amax$ for $t > \t$, is self-consistent with the
-so-obtained value function. In a sense, this is like confirming an ansatz. For a higher
-value of $\eps$, like $\eps = .1$, this is no longer the case. The red
-curves on the right-side of \cref{fig:HJB_4regimes_control_different_eps} are no
-longer pushed up at $\a = \amax$, and as such it is no longer valid to
-assume that the value function can be obtained by assuming $\a(t>\T) = \amax$
-and then just calculating the expected remaining time-to-spike.
-The exact same conclusion can be drawn from the open-loop control. There the
-optimal control always (almost) reaches its maximum, $\amax$ while choosing
-$\eps = .001$, but no longer so for the higher $\eps = .1$.
-In fact, as we mentioned after \cref{eq:valuefun_TCs}, the correct thing to do
-for higher values of $\eps$, is to push the
-calculation interval to some $t^+ > \T$, apply the same terminal condition at
-$t^+$ instead of $\T$ and then solve backwards (either for the closed- or
-open-loop control). One will be guaranteed to find some $t_f > \T$ that works
-since eventually the quadratic term $(t-\T)^2$ will dominate the energy term in
-the objective, which is linear in $t$. We do not explore this further here. 
-% CLOSED_LOOP EPS: 
-\begin{figure}[htp]
-\begin{center}
-  \includegraphics[width=.99\textwidth]{Figs/HJB/Regimes_eps_comparison.pdf}
-  \caption[labelInTOC]{Effect of $\e$ on the closed-loop control. Snapshots of
-  $\a(x,t)$ for $t$ fixed, at the start (blue), mid-point (green) and end-point
-  (red), for each of the four regimes and different values of $\eps$.
-  On the left, we use $\eps = .001$ and on the right $\eps = .1$. 
-  The desired spike time is set to
-  $\T=1.5$ and the bounds are $\a \in [-2,2]$.
-  A,B) Supra-Threshold-High-Noise C,D) Supra-Threshold-Low-Noise 
-  E,F) Sub-Threshold-High-Noise G,H) Sub-Threshold-Low-Noise}
-\label{fig:HJB_4regimes_control_different_eps} 
-\end{center}
-\end{figure}
-% OPEN_LOOP EPS:
-\begin{figure}[htp]
-\begin{center}
-  \includegraphics[width=.99\textwidth]{Figs/FP_Adjoint/Regimes_eps_comparison.pdf}
-  \caption[labelInTOC]{Effect of $\e$ on the open-loop control. 
-  The deterministic time-trajectory of $\a(t)$ for each
-  parameter regime as function of time, $t \in [0, \T]$.
-  On the left, we use $\eps = .001$ and on the right $\eps = .1$.
-  The desired spike time is set to $\T=1.5$ and the bounds are $\a \in [-2,2]$.
-  A,B) Supra-Threshold-High-Noise C,D) Supra-Threshold-Low-Noise 
-  E,F) Sub-Threshold-High-Noise G,H) Sub-Threshold-Low-Noise}
-  \label{fig:FBK_Regimes_cs_different_es}
-\end{center}
-\end{figure}
-
-\clearpage
- 
-\section{Test Comparison of Different Controls}
+\section{Simulations} 
+\subsection{Single-Spike Control}
 \label{sec:probabilistic_numerical_test}
 Having obtained the optimal controllers, both closed- and open-loop, we evaluate
 their performance with simulated realizations of the voltage process,
@@ -1014,7 +899,7 @@ importance and the paramount effect on the objective is the difference $(\ts -
 \T)$, which we are trying to minimize.
 
 The performance of the three controllers for each parameter regime is given in
-\cref{tab:realized_avg_errors_det_vs_openloop_vs_stoch} and  
+\cref{tab:realized_avg_errors_det_vs_openloop_vs_stoch} and
 \cref{fig:error_histograms_det_vs_openloop_vs_stoch}. Naturally, the closed-loop
 achieves a lower error than the open-loop, and the naive controller fares worst.
 The difference in performance mostly depends on the strength of the noise. Thus,
@@ -1050,32 +935,35 @@ empirical performance is obtained using $N=10000$ sample paths. The theoretical
 performance is found using the optimal value for $J$ for the open-loop
 stochastic control and the value function $\v(x=0, t =0)$ for the closed-loop
 stochastic control.}
-\label{tab:realized_avg_errors_det_vs_openloop_vs_stoch}  
+\label{tab:realized_avg_errors_det_vs_openloop_vs_stoch}
 \end{center}
 \end{table}
-   
+
 \begin{figure}[h]
 \begin{center}
+\subfloat[Supra-Threshold Low-Noise]{
+  \includegraphics[width=.99\textwidth]
+  {Figs/ControlSimulator/Regimes_SUPT_ln_errors_hist.pdf}
+}
+\\
 \subfloat[Supra-Threshold High-Noise]{
   \includegraphics[width=.99\textwidth]
   {Figs/ControlSimulator/Regimes_SUPT_HN_errors_hist.pdf}
-  }\\
-\subfloat[Supra-Threshold Low-Noise]{
-  \includegraphics[width=.99\textwidth] 
-  {Figs/ControlSimulator/Regimes_SUPT_ln_errors_hist.pdf}
-}\\
-\subfloat[Sub-Threshold High-Noise]{
-  \includegraphics[width=.99\textwidth]
-  {Figs/ControlSimulator/Regimes_subt_HN_errors_hist.pdf}
-}\\   
+  }
+  \\
 \subfloat[Sub-Threshold Low-Noise]{
   \includegraphics[width=.99\textwidth]
   {Figs/ControlSimulator/Regimes_subt_ln_errors_hist.pdf}
 }
+\\
+\subfloat[Sub-Threshold High-Noise]{
+  \includegraphics[width=.99\textwidth]
+  {Figs/ControlSimulator/Regimes_subt_HN_errors_hist.pdf}
+}\\
   \caption[labelInTOC]{Histogram of the spike timing error for the
   deterministic (left) vs. open-loop stochastic(centre) vs. closed-loop
   stochastic (right) control laws. This is for the same problem as in
-  \cref{fig:control_trajectories_examples}. 
+  \cref{fig:control_trajectories_examples}.
   We have used $N=10000$ sample paths
   to form the statistics}
   \label{fig:error_histograms_det_vs_openloop_vs_stoch}
@@ -1089,13 +977,13 @@ stochastic control.}
 {
 \label{fig:controlled_traj_ex1}
 \includegraphics[width=0.33\textwidth]
-{Figs/ControlSimulator/SubTHighNoise_Traj5.pdf}
+{Figs/ControlSimulator/SubTHighNoise_Traj0.pdf}
 }
 \subfloat[ ]
 {
 \label{fig:controlled_traj_ex2}
-\includegraphics[width=0.33\textwidth] 
-{Figs/ControlSimulator/SubTHighNoise_Traj3.pdf}
+\includegraphics[width=0.33\textwidth]
+{Figs/ControlSimulator/SubTHighNoise_Traj4.pdf}
 }
 \subfloat[ ]
 {
@@ -1112,9 +1000,9 @@ right are three different realizations of the model dynamics. On the upper
 plots, we show the voltage evolution, $X_t$, on the lower plots we show the
 applied control, $\a(t)$. Note that $\a(t)$ obtained from the
 deterministic and open-loop controls are the same for all three samples.}
-\label{fig:control_trajectories_examples} 
+\label{fig:control_trajectories_examples}
 \end{center}
-\end{figure}  
+\end{figure}
 
 \begin{figure}[h]
 \begin{center}
@@ -1134,30 +1022,338 @@ deterministic and open-loop controls are the same for all three samples.}
 {
 \label{fig:controlled_traj_ex3}
 \includegraphics[width=0.33\textwidth]
-{Figs/ControlSimulator/HighEps_Traj0.pdf}  
+{Figs/ControlSimulator/HighEps_Traj0.pdf}
 }
-\caption[]{The effect of higher energy penalty, $\eps = .1$!
+\caption[]{The effect of higher energy penalty, $\eps = 0.1$.
 Examples for the controlled trajectories using the deterministic,
 open-loop stochastic and closed-loop stochastic control approaches. The black vertical line in the plots indicates the desired
 spike-time, $\T$. For the parameter values are $\m, \tc, \b = [.2, .5,  1.5]$ (Sub-Threshold
 High-Noise regime). $\T = 1.5, \eps = .1$. The three panels from left to
 right are three different realizations of the model dynamics. On the upper
 plots, we show the voltage evolution, $X_t$, on the lower plots we show the
-applied control, $\a(t)$. Note that $\a(t)$ obtained from the
-deterministic and open-loop controls are the same for all three samples.}
-\label{fig:control_trajectories_examples_high_epsilon} 
+applied control, $\a(t)$. Note that the optimal control, $\a(t)$, obtained from
+the deterministic and from the open-loop controls are the same across all three
+samples.}
+\label{fig:control_trajectories_examples_high_epsilon}
 \end{center}
-\end{figure} 
+\end{figure}
 
-\clearpage 
+\subsection{Multi-Spike Control}
+We now turn to the ultimate goal of our analysis, the control of {\sl spike
+trains}. In particular, we will generate $M=10$ realizations of $N=20$ spikes
+each in attempt to meet a prescribed spike train. We will focus on two
+regimes, the sub-threshold regime with either low or high noise.
+The results
+for parameters from the Sub-Threshold, Low-Noise regime are shown in
+results in \cref{fig:targettrain_cl_lownoise,fig:targettrain_ol_lownoise}.
+While, the results
+for parameters from the Sub-Threshold, High-Noise regime are shown in
+results in \cref{fig:targettrain_cl_highnoise,fig:targettrain_ol_highnoise}.
+%\usepackage{graphics} is needed for \includegraphics
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%% CRIT REGIME LOW-NOISe:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[htp]
+\begin{center}
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/CRITLN_cl_trains_sim_10.pdf}
+  \caption[ ]{How good the {\sl closed-loop} controller is at hitting a target
+  spike train. Uses the parameters from the CRITICAL,Low-Noise regime. The
+  target spike train has ISIs that are exponentially distributed with a
+  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
+  control strategy}
+  \label{fig:targettrain_cl_critlownoise}
+\end{center}
+\end{figure}
+\begin{figure}[htp]
+\begin{center}
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/CRITLN_ol_trains_sim_10.pdf}
+  \caption[ ]{How good the {\sl open-loop} controller is at hitting a target
+  spike train. Uses the parameters from the CRITICAL,Low-Noise regime. The
+  target spike train has ISIs that are exponentially distributed with a
+  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
+  control strategy}
+  \label{fig:targettrain_ol_critlownoise}
+\end{center}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%% CRIT REGIME HIGH-NOISe:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[htp]
+\begin{center}
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/CRITHN_cl_trains_sim_10.pdf}
+  \caption[ ]{How good the {\sl closed-loop} controller is at hitting a target
+  spike train. Uses the parameters from the CRITICAL, High-Noise regime. The
+  target spike train has ISIs that are exponentially distributed with a
+  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
+  control strategy}
+  \label{fig:targettrain_cl_critlownoise}
+\end{center}
+\end{figure}
+\begin{figure}[htp]
+\begin{center}
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/CRITHN_ol_trains_sim_10.pdf}
+  \caption[ ]{How good the {\sl open-loop} controller is at hitting a target
+  spike train. Uses the parameters from the CRITICAL, High-Noise regime. The
+  target spike train has ISIs that are exponentially distributed with a
+  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
+  control strategy}
+  \label{fig:targettrain_ol_critlownoise}
+\end{center}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%% CRIT REGIME LOW-NOISe (AHmadian):
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[htp]
+\begin{center}
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/CRITLN_Ahmadian_cl_trains_sim_10.pdf}
+  \caption[ ]{AHMADIAN COMPARES: How good the {\sl closed-loop} controller is at
+  hitting a target spike train. Uses the parameters from the CRITICAL, Low-Noise
+  regime. The target spike train has ISIs that are exponentially distributed with a
+  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
+  control strategy}
+  \label{fig:targettrain_cl_critlownoise}
+\end{center}
+\end{figure}
+\begin{figure}[htp]
+\begin{center}
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/CRITLN_Ahmadian_ol_trains_sim_10.pdf}
+  \caption[ ]{AHMADIAN COMPARES: How good the {\sl open-loop} controller is at
+  hitting a target spike train. Uses the parameters from the CRITICAL, Low-Noise
+  regime. The target spike train has ISIs that are exponentially distributed with a
+  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
+  control strategy}
+  \label{fig:targettrain_ol_critlownoise}
+\end{center}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%% FIGS:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[htp]
+\begin{center}
+\subfloat[DO NOT SKIP MISSED]{
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTLN_cl_trains_sim_10.pdf}
+  }\\
+ \subfloat[SKIP MISSED]{
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTLN_cl_skip_trains_sim_10.pdf}
+  }
+  \caption[ ]{How good the {\sl closed-loop} controller is at hitting a target
+  spike train. Uses the parameters from the Sub-Threshold,Low-Noise regime. The
+  target spike train has ISIs that are exponentially distributed with a
+  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
+  control strategy}
+  \label{fig:targettrain_cl_lownoise}
+\end{center}
+\end{figure}
+\begin{figure}[htp]
+\begin{center}
+\subfloat[DO NOT SKIP MISSED]{
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTLN_ol_trains_sim_10.pdf}
+  }\\
+ \subfloat[SKIP MISSED]{
+ \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTLN_ol_skip_trains_sim_10.pdf}
+ }
+  \caption[ ]{How good the {\sl open-loop} controller is at hitting a target
+  spike train. Uses the parameters from the Sub-Threshold,Low-Noise regime. The
+  target spike train has ISIs that are exponentially distributed with a
+  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
+  control strategy}
+  \label{fig:targettrain_ol_lownoise}
+\end{center}
+\end{figure}
+\begin{figure}[htp]
+\begin{center}    \subfloat[DO NOT SKIP MISSED]{
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTHN_cl_trains_sim_10.pdf}  }\\
+ \subfloat[SKIP MISSED]{
+ \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTHN_cl_skip_trains_sim_10.pdf}
+ }
+  \caption[ ]{How good the {\sl closed-loop} controller is at hitting a target
+  spike train. Uses the parameters from the Sub-Threshold,High-Noise regime. The
+  target spike train has ISIs that are exponentially distributed with a
+  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
+  control strategy}
+  \label{fig:targettrain_cl_highnoise}
+\end{center}
+\end{figure}
+\begin{figure}[htp]
+\begin{center}    \subfloat[DO NOT SKIP MISSED]{
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTHN_ol_trains_sim_10.pdf}  }\\
+ \subfloat[SKIP MISSED]{
+ \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTHN_ol_skip_trains_sim_10.pdf}
+ }
+  \caption[ ]{How good the {\sl open-loop} controller is at hitting a target
+  spike train. Uses the parameters from the Sub-Threshold,High-Noise regime. The
+  target spike train has ISIs that are exponentially distributed with a
+  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
+  control strategy}
+  \label{fig:targettrain_ol_highnoise}
+\end{center}
+\end{figure}
 
-\section{Control Robustness}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%% SUPER-THRESHOLD REGIME LOW-NOISe (Ahmadian):
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[htp]
+\begin{center}
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/SUPERTLN_Ahmadian_cl_trains_sim_10.pdf}
+  \caption[ ]{AHMADIAN COMPARES (SUPER-T): How good the {\sl closed-loop}
+  controller is at hitting a target spike train. Uses the parameters from the
+  SUPER-THRESH, High-Noise regime. The target spike train has ISIs that are exponentially distributed with a
+  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
+  control strategy}
+  \label{fig:targettrain_cl_critlownoise}
+\end{center}
+\end{figure}
+\begin{figure}[htp]
+\begin{center}
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/SUPERTLN_Ahmadian_ol_trains_sim_10.pdf}
+  \caption[ ]{AHMADIAN COMPARES (SUPER-T): How good the {\sl open-loop}
+  controller is at hitting a target spike train. Uses the parameters from the
+  SUPER-THRESH, High-Noise regime. The target spike train has ISIs that are
+  exponentially distributed with a mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
+  control strategy}
+  \label{fig:targettrain_ol_critlownoise}
+\end{center}
+\end{figure}
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%% SKIP MISSED FIGS:
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{figure}[htp]
+% \begin{center}
+%   \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTLN_cl_skip_trains_sim_10.pdf}
+%   \caption[ ]{SKIPPING MISSED TARGET. How good the {\sl closed-loop} controller is at hitting a target
+%   spike train. Uses the parameters from the Sub-Threshold,Low-Noise regime. The
+%   target spike train has ISIs that are exponentially distributed with a
+%   mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
+%   control strategy}
+%   \label{fig:targettrain_cl_lownoise}
+% \end{center}
+% \end{figure}
+% \begin{figure}[htp]
+% \begin{center}
+%   \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTLN_ol_skip_trains_sim_10.pdf}
+%   \caption[ ]{SKIPPING MISSED TARGET. How good the {\sl open-loop} controller is at hitting a target
+%   spike train. Uses the parameters from the Sub-Threshold,Low-Noise regime. The
+%   target spike train has ISIs that are exponentially distributed with a
+%   mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
+%   control strategy}
+%   \label{fig:targettrain_ol_lownoise}
+% \end{center}
+% \end{figure}
+% \begin{figure}[htp]
+% \begin{center}
+%   \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTHN_cl_skip_trains_sim_10.pdf}
+%   \caption[ ]{SKIPPING MISSED TARGET. How good the {\sl closed-loop} controller is at hitting a target
+%   spike train. Uses the parameters from the Sub-Threshold,High-Noise regime. The
+%   target spike train has ISIs that are exponentially distributed with a
+%   mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
+%   control strategy}
+%   \label{fig:targettrain_cl_highnoise}
+% \end{center}
+% \end{figure}
+% \begin{figure}[htp]
+% \begin{center}
+%   \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTHN_ol_skip_trains_sim_10.pdf}
+%   \caption[ ]{SKIPPING MISSED TARGET. How good the {\sl open-loop} controller is at hitting a target
+%   spike train. Uses the parameters from the Sub-Threshold,High-Noise regime. The
+%   target spike train has ISIs that are exponentially distributed with a
+%   mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
+%   control strategy}
+%   \label{fig:targettrain_ol_highnoise}
+% \end{center}
+% \end{figure}
+
+\section{Miscleaneous Analysis???}
+TODO: WE DON''T KNOW WHAT TO CALL THIS SECTION!
+\subsection{Effect of energy penalty}
+\label{sec:effect_of_eps}
+So far we have assumed a low value for the energy penalty parameter,
+$\eps$, in the objective defined in \cref{eq:OC_LS_variance_energy}. Our
+approach has been that we are most concerned with the accurate spiking and that
+penalizing energy is rather intended to regularize the control and avoid
+excessive chattering of the control between its extreme values, than as a goal
+in minimizing energy in its own right. Now, we take some time to explore the
+effect of a higher $\eps$ on the optimal controls. Intuitively, a
+higher value of $\eps$ will tend to bring the optimal control, $\a^*$, closer
+to zero. We make a comparison for the four regimes for both the
+closed-loop control and the open-loop control in
+\cref{fig:HJB_4regimes_control_different_eps,fig:FBK_Regimes_cs_different_es}.
+Indeed, for both the closed-loop and open-loop optimal controls, increasing
+$\eps$ tends to reduce the absolute value of $\a^*(t)$. In particular, for the
+closed-loop control it tends to broaden the area of transition for
+decreasing $x$ when the control swings from its minimal, i.e.\ inhibitory value,
+to its maximal, i.e.\ excitatory value. Similarly for the open-loop control,
+instead of banging from its minimal bound at the beginning of the interval to
+its maximal bound at the end, the optimal control for $\e = .1$ tends to have a
+more mild transition from a slightly inhibitory to slightly excitatory
+values.
+
+Note however that increasing $\eps$ has an important effect on the validity of
+the approximation, used to form the terminal conditions for
+the value function and the adjoint variable, $\v,p$. We assumed that applying
+$\amax$ is optimal for $t>\T$. This is indeed true in the
+limit $\eps \ra 0$. However, even for a finite value of $\eps$, this may still
+be the optimal thing to do. Indeed, in the original calculations,
+where $\eps=.001$, see the panels on the left in
+\cref{fig:HJB_4regimes_control_different_eps,fig:FBK_Regimes_cs_different_es},
+the so-obtained value function {\sl implied} that $\a(x,\T) = \amax.$. I.e.\ our
+guess that $\a(x, t) = \amax$ for $t > \t$, is self-consistent with the
+so-obtained value function. In a sense, this is like confirming an ansatz. For a higher
+value of $\eps$, like $\eps = .1$, this is no longer the case. The red
+curves on the right-side of \cref{fig:HJB_4regimes_control_different_eps} are no
+longer pushed up at $\a = \amax$, and as such it is no longer valid to
+assume that the value function can be obtained by assuming $\a(t>\T) = \amax$
+and then just calculating the expected remaining time-to-spike.
+The exact same conclusion can be drawn from the open-loop control. There the
+optimal control always (almost) reaches its maximum, $\amax$ while choosing
+$\eps = .001$, but no longer so for the higher $\eps = .1$.
+In fact, as we mentioned after \cref{eq:valuefun_TCs}, the correct thing to do
+for higher values of $\eps$, is to push the
+calculation interval to some $t^+ > \T$, apply the same terminal condition at
+$t^+$ instead of $\T$ and then solve backwards (either for the closed- or
+open-loop control). One will be guaranteed to find some $t_f > \T$ that works
+since eventually the quadratic term $(t-\T)^2$ will dominate the energy term in
+the objective, which is linear in $t$. We do not explore this further here.
+% CLOSED_LOOP EPS:
+\begin{figure}[htp]
+\begin{center}
+  \includegraphics[width=.99\textwidth]{Figs/HJB/Regimes_eps_comparison.pdf}
+  \caption[labelInTOC]{Effect of $\e$ on the closed-loop control. Snapshots of
+  $\a(x,t)$ for $t$ fixed, at the start (blue), mid-point (green) and end-point
+  (red), for each of the four regimes and different values of $\eps$.
+  On the left, we use $\eps = .001$ and on the right $\eps = .1$.
+  The desired spike time is set to
+  $\T=1.5$ and the bounds are $\a \in [-2,2]$.
+  A,B) Supra-Threshold-High-Noise C,D) Supra-Threshold-Low-Noise
+  E,F) Sub-Threshold-High-Noise G,H) Sub-Threshold-Low-Noise}
+\label{fig:HJB_4regimes_control_different_eps}
+\end{center}
+\end{figure}
+% OPEN_LOOP EPS:
+\begin{figure}[htp]
+\begin{center}
+  \includegraphics[width=.99\textwidth]{Figs/FP_Adjoint/Regimes_eps_comparison.pdf}
+  \caption[labelInTOC]{Effect of $\e$ on the open-loop control.
+  The deterministic time-trajectory of $\a(t)$ for each
+  parameter regime as function of time, $t \in [0, \T]$.
+  On the left, we use $\eps = .001$ and on the right $\eps = .1$.
+  The desired spike time is set to $\T=1.5$ and the bounds are $\a \in [-2,2]$.
+  A,B) Supra-Threshold-High-Noise C,D) Supra-Threshold-Low-Noise
+  E,F) Sub-Threshold-High-Noise G,H) Sub-Threshold-Low-Noise}
+  \label{fig:FBK_Regimes_cs_different_es}
+\end{center}
+\end{figure}
+
+% \clearpage
+
+
+\subsection{Control Robustness}
 We have so far assumed that we know the parameters determining the dynamics in
 \cref{eq:X_evolution_uo} exactly. That is we assume that the values for $\tc,
 \b$ used to obtain the controls are the same as the ones that drive the
 controlled dynamics. That is slightly naive, as in any realistic application
 these will have to be estimated and the estimates will have some error
-associated with them. 
+associated with them.
 Note that misestimating $\mu$ has the most immediate and clear effect on the
 control policy as that amounts to a direct shift of the control and so for now,
 let us assume that $\mu$ is estimated correctly.
@@ -1168,7 +1364,7 @@ High-Noise regime, and see what is the impact of misspecifying the parameters.
 We need to assume that the errors large but not too large\ldots
 
 So say, $$\b_{est} = \b / 1.5$$
-and 
+and
 $$\tc_{est} = \tc / 1.5$$
 
 So we will have:
@@ -1187,215 +1383,16 @@ We show the effect in
  system parameters and the parameters used to obtain the control are the
  same, i.e.\ accurate, on the right, they are misspecified.}
 \label{tab:realized_avg_errors_det_vs_openloop_vs_stoch_misspecified}
-\end{center}   
+\end{center}
 \end{table}
 
 
-\section{Trains Simulation }
-We now turn to the ultimate goal of our analysis, the control of {\sl spike
-trains}. In particular, we will generate $M=10$ realizations of $N=20$ spikes
-each in attempt to meet a prescribed spike train. We will focus on two
-regimes, the sub-threshold regime with either low or high noise. 
-The results
-for parameters from the Sub-Threshold, Low-Noise regime are shown in
-results in \cref{fig:targettrain_cl_lownoise,fig:targettrain_ol_lownoise}.
-While, the results
-for parameters from the Sub-Threshold, High-Noise regime are shown in
-results in \cref{fig:targettrain_cl_highnoise,fig:targettrain_ol_highnoise}.
-%\usepackage{graphics} is needed for \includegraphics
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%% CRIT REGIME LOW-NOISe:
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[htp]     
-\begin{center}  
-  \includegraphics[width=.99\textwidth]{Figs/TrainController/CRITLN_cl_trains_sim_10.pdf}
-  \caption[ ]{How good the {\sl closed-loop} controller is at hitting a target
-  spike train. Uses the parameters from the CRITICAL,Low-Noise regime. The
-  target spike train has ISIs that are exponentially distributed with a
-  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
-  control strategy}
-  \label{fig:targettrain_cl_critlownoise}  
-\end{center}
-\end{figure}    
-\begin{figure}[htp]     
-\begin{center}  
-  \includegraphics[width=.99\textwidth]{Figs/TrainController/CRITLN_ol_trains_sim_10.pdf}
-  \caption[ ]{How good the {\sl open-loop} controller is at hitting a target
-  spike train. Uses the parameters from the CRITICAL,Low-Noise regime. The
-  target spike train has ISIs that are exponentially distributed with a
-  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
-  control strategy} 
-  \label{fig:targettrain_ol_critlownoise}    
-\end{center} 
-\end{figure}   
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%% CRIT REGIME HIGH-NOISe:
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[htp]     
-\begin{center}  
-  \includegraphics[width=.99\textwidth]{Figs/TrainController/CRITHN_cl_trains_sim_10.pdf}
-  \caption[ ]{How good the {\sl closed-loop} controller is at hitting a target
-  spike train. Uses the parameters from the CRITICAL, High-Noise regime. The
-  target spike train has ISIs that are exponentially distributed with a
-  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
-  control strategy}
-  \label{fig:targettrain_cl_critlownoise}  
-\end{center}
-\end{figure}   
-\begin{figure}[htp]     
-\begin{center}  
-  \includegraphics[width=.99\textwidth]{Figs/TrainController/CRITHN_ol_trains_sim_10.pdf}
-  \caption[ ]{How good the {\sl open-loop} controller is at hitting a target
-  spike train. Uses the parameters from the CRITICAL, High-Noise regime. The
-  target spike train has ISIs that are exponentially distributed with a
-  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
-  control strategy}
-  \label{fig:targettrain_ol_critlownoise}   
-\end{center}
-\end{figure}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%% CRIT REGIME LOW-NOISe (AHmadian):
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[htp]     
-\begin{center}  
-  \includegraphics[width=.99\textwidth]{Figs/TrainController/CRITLN_Ahmadian_cl_trains_sim_10.pdf}
-  \caption[ ]{AHMADIAN COMPARES: How good the {\sl closed-loop} controller is at
-  hitting a target spike train. Uses the parameters from the CRITICAL, High-Noise regime. The
-  target spike train has ISIs that are exponentially distributed with a
-  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
-  control strategy}
-  \label{fig:targettrain_cl_critlownoise}  
-\end{center}
-\end{figure}   
-\begin{figure}[htp]     
-\begin{center}  
-  \includegraphics[width=.99\textwidth]{Figs/TrainController/CRITLN_Ahmadian_ol_trains_sim_10.pdf}
-  \caption[ ]{AHMADIAN COMPARES: How good the {\sl open-loop} controller is at
-  hitting a target spike train. Uses the parameters from the CRITICAL, High-Noise regime. The
-  target spike train has ISIs that are exponentially distributed with a
-  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
-  control strategy}
-  \label{fig:targettrain_ol_critlownoise}   
-\end{center}
-\end{figure}  
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%% FIGS:
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[htp]     
-\begin{center}  
-\subfloat[DO NOT SKIP MISSED]{
-  \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTLN_cl_trains_sim_10.pdf}
-  }\\
- \subfloat[SKIP MISSED]{
-  \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTLN_cl_skip_trains_sim_10.pdf}
-  }
-  \caption[ ]{How good the {\sl closed-loop} controller is at hitting a target
-  spike train. Uses the parameters from the Sub-Threshold,Low-Noise regime. The
-  target spike train has ISIs that are exponentially distributed with a
-  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
-  control strategy}
-  \label{fig:targettrain_cl_lownoise}  
-\end{center}
-\end{figure}   
-\begin{figure}[htp]  
-\begin{center}
-\subfloat[DO NOT SKIP MISSED]{
-  \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTLN_ol_trains_sim_10.pdf}
-  }\\
- \subfloat[SKIP MISSED]{
- \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTLN_ol_skip_trains_sim_10.pdf}
- }     
-  \caption[ ]{How good the {\sl open-loop} controller is at hitting a target
-  spike train. Uses the parameters from the Sub-Threshold,Low-Noise regime. The
-  target spike train has ISIs that are exponentially distributed with a
-  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the   
-  control strategy}
-  \label{fig:targettrain_ol_lownoise}
-\end{center}
-\end{figure}
-\begin{figure}[htp]  
-\begin{center}    \subfloat[DO NOT SKIP MISSED]{ 
-  \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTHN_cl_trains_sim_10.pdf}  }\\
- \subfloat[SKIP MISSED]{
- \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTHN_cl_skip_trains_sim_10.pdf}
- }  
-  \caption[ ]{How good the {\sl closed-loop} controller is at hitting a target
-  spike train. Uses the parameters from the Sub-Threshold,High-Noise regime. The
-  target spike train has ISIs that are exponentially distributed with a 
-  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
-  control strategy}
-  \label{fig:targettrain_cl_highnoise}
-\end{center}
-\end{figure}  
-\begin{figure}[htp]  
-\begin{center}    \subfloat[DO NOT SKIP MISSED]{ 
-  \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTHN_ol_trains_sim_10.pdf}  }\\
- \subfloat[SKIP MISSED]{
- \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTHN_ol_skip_trains_sim_10.pdf}
- }  
-  \caption[ ]{How good the {\sl open-loop} controller is at hitting a target
-  spike train. Uses the parameters from the Sub-Threshold,High-Noise regime. The
-  target spike train has ISIs that are exponentially distributed with a
-  mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
-  control strategy}
-  \label{fig:targettrain_ol_highnoise}
-\end{center}
-\end{figure}    
-\clearpage
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%% SKIP MISSED FIGS:
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \begin{figure}[htp]     
-% \begin{center}  
-%   \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTLN_cl_skip_trains_sim_10.pdf}
-%   \caption[ ]{SKIPPING MISSED TARGET. How good the {\sl closed-loop} controller is at hitting a target
-%   spike train. Uses the parameters from the Sub-Threshold,Low-Noise regime. The
-%   target spike train has ISIs that are exponentially distributed with a
-%   mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
-%   control strategy}
-%   \label{fig:targettrain_cl_lownoise}  
-% \end{center}
-% \end{figure}   
-% \begin{figure}[htp]  
-% \begin{center}     
-%   \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTLN_ol_skip_trains_sim_10.pdf}
-%   \caption[ ]{SKIPPING MISSED TARGET. How good the {\sl open-loop} controller is at hitting a target
-%   spike train. Uses the parameters from the Sub-Threshold,Low-Noise regime. The
-%   target spike train has ISIs that are exponentially distributed with a
-%   mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the   
-%   control strategy}
-%   \label{fig:targettrain_ol_lownoise}
-% \end{center}
-% \end{figure}
-% \begin{figure}[htp]  
-% \begin{center}     
-%   \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTHN_cl_skip_trains_sim_10.pdf}
-%   \caption[ ]{SKIPPING MISSED TARGET. How good the {\sl closed-loop} controller is at hitting a target
-%   spike train. Uses the parameters from the Sub-Threshold,High-Noise regime. The
-%   target spike train has ISIs that are exponentially distributed with a
-%   mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
-%   control strategy}
-%   \label{fig:targettrain_cl_highnoise}
-% \end{center}
-% \end{figure}  
-% \begin{figure}[htp]  
-% \begin{center}     
-%   \includegraphics[width=.99\textwidth]{Figs/TrainController/SUBTHN_ol_skip_trains_sim_10.pdf}
-%   \caption[ ]{SKIPPING MISSED TARGET. How good the {\sl open-loop} controller is at hitting a target
-%   spike train. Uses the parameters from the Sub-Threshold,High-Noise regime. The
-%   target spike train has ISIs that are exponentially distributed with a
-%   mean of $1.5$ a.u. There are $N=20$ spikes and $M=10$ realizations of the
-%   control strategy}
-%   \label{fig:targettrain_ol_highnoise}
-% \end{center}
-% \end{figure}  
-\clearpage
-\section{Conclusions / Discussion} 
+\section{Discussion}
 We have analyzed and computed the optimal control of spikes in two scenarios -
 one where the underlying voltage of the neuron is observable to the controller
 (closed-loop control) and one where only the spikes are observable (open-loop
-control). 
- 
+control).
+
 ALEX: SUBSECTIONS ARE FOR DRAFT ONLY - THEY WILL BE FUSED
 TOGETHER IN FINAL SUBMISSION
 \subsection{different regimes}
@@ -1407,7 +1404,7 @@ The bias current has a more helpful role at least in our examples, where a
 high value of the bias tends to help precise spiking. Of course, where it helps
 or hinders depends on the value of the desired spike time - a combination of a
 high positive bias and a 'distant' spike time, will tend to be difficult to
-control as the system will naturally tend to spike earlier than desired. 
+control as the system will naturally tend to spike earlier than desired.
 
 \subsection{computational matters}
 In both cases finding the optimal control is computationally intensive as we
@@ -1426,7 +1423,7 @@ may be to require that $\Exp[\ts] = \T$. It is non-trivial to do this in the
 dynamic programing framework, while it is fairly straightforward while working
 with the forward equation in the open-loop context. A similarly comment may be
 made about maximizing the
-likelihood of $\ts = T$, which is the objective chosen in \cite{Ahmadian2011}. 
+likelihood of $\ts = T$, which is the objective chosen in \cite{Ahmadian2011}.
 
 \subsection{relation to other works}
 Our work has strayed pretty close to the paradigm of \cite{Ahmadian2011} in
@@ -1458,19 +1455,22 @@ experiments show that these demands are potentially feasible. It
 however remains to be seen whether they can be successfully applied in the lab
 and beyond.
 
-\subsection{{\sl Stochastic} effects} 
+\subsection{{\sl Stochastic} effects}
 We show how wrong the control strategy can be if we assume that the noise is
-negligible. 
+negligible.
+
+\section{Acknowledgements}
+
 
 \appendix
 \section{Calculating the Terminal Conditions for the HJB equation}
 \label{sec:valuefun_TCs}
 Here we explain how to calculate the first two moments of the time to-spike,
 $\Exp \big[\trem^p \,\Big|\, X_\T = x, \a(t) = \amax \big].$, which is needed in setting the terminal conditions for both,
-$\v(x,\T)$ and $p(x,\T)$, see \cref{eq:OC_LS_HJB_full} and \cref{eq:adjoint_pde_OU}. 
+$\v(x,\T)$ and $p(x,\T)$, see \cref{eq:OC_LS_HJB_full} and \cref{eq:adjoint_pde_OU}.
 
-Let 
-\begin{equation} 
+Let
+\begin{equation}
 \begin{array}{lcl}
 \Tone(x_0) &=& \Exp \Big[\trem \,\Big|\, X_\T = x, \a(t) = \amax
 \Big]
@@ -1485,7 +1485,7 @@ and $\a(t) = \amax$.
 Naturally, the $\Ti$'s depend on $x_\T$ and are affected by the value of the
 various parameters, $\a,\b,\tc$.
 
-Actually, we only  need $\Ttwo$ for the TCs in \cref{eq:OC_LS_HJB_full} and \cref{eq:adjoint_pde_OU}. 
+Actually, we only  need $\Ttwo$ for the TCs in \cref{eq:OC_LS_HJB_full} and \cref{eq:adjoint_pde_OU}.
 but $\Tone$ is needed as an auxiliary.
 
 Indeed, analytical expressions exist for $\Ti$, e.g.\ see \cite{Inoue1995}.
@@ -1498,8 +1498,8 @@ $\Tone$, however it is quite clear from his discussion how to proceed
 recursively to obtain any higher moment $\Ti$, by using previously calculated
 lower moments. This is what we do here. Moreover the relation between mean exit
 times and boundary value problems is discussed in most
-introductory books on stochastic processes, see \cite{Oksendal2007,Evansa} etc.},
-\cite{Jacobs}, in deriving and solving a differential equation for
+introductory books on stochastic processes, see \cite{Oksendal2007} for
+example.}, \cite{Jacobs}, in deriving and solving a differential equation for
 $\Ti(x_0)$.
 
 Basically we are calculating the mean-time-squared to exit an interval $[\xmin,
@@ -1515,7 +1515,7 @@ following (backward Kolmogorov) PDE
 \label{eq:backward_Xdensity}
 \end{equation}
 
-Let $\G(t,y)$ be the survival function for $T$ for $X_0 = y$. 
+Let $\G(t,y)$ be the survival function for $T$ for $X_0 = y$.
 $$\G(t,y) = \Prob[T>t | X_0 = y] = \Prob[X_{s\leq t} \in [\xmin,
 \xth] | X_0 = y]$$.
 
@@ -1549,22 +1549,22 @@ $\Ttwo(x_0)$ as:
 		   &=& \int_0^\infty 2t \cdot \G(t,x_0) \intd{t}
 \end{eqnarray}
 assuming it exists.
- 
+
 Since $\Ttwo$ is an integral over time, we can reduce the PDE in
 \cref{eq:backward_SDF} for the distribution to a BVP for the moment(s) by
 integrating over time. Here is how this is done: multiply both sides  of
 \cref{eq:backward_SDF} by $2t$, and integrate with respect to time:
 \begin{equation}
 \int_0^\infty 2t (-\di_t \G) \intd{t}
-= 
+=
 \int_0^\infty  2t \left[ (\a - \frac y\tc) \di_y\G - \frac {\b^2} 2
 \di_y^2 \G\right]
 \intd{t}
 \end{equation}
-The LHS turns out to be $2\Tone$, so 
+The LHS turns out to be $2\Tone$, so
 \begin{equation}
-2\Tone 
-=(\a - \frac y\tc)   \di_y \Ttwo 
+2\Tone
+=(\a - \frac y\tc)   \di_y \Ttwo
 - \frac {\b^2} 2
 \di_y^2 \Ttwo
 \label{eq:BVP_Ttwo}
@@ -1572,10 +1572,10 @@ The LHS turns out to be $2\Tone$, so
 Similarly we can derive an equation for $\Tone$, namely:
 \begin{equation}
 1
-=(\a - \frac y\tc)   \di_y \Tone 
+=(\a - \frac y\tc)   \di_y \Tone
 - \frac {\b^2} 2
 \di_y^2 \Tone
-\label{eq:BVP_Tone} 
+\label{eq:BVP_Tone}
 \end{equation}
 In both cases, the BCs will be:
 \begin{equation}
@@ -1596,9 +1596,10 @@ That is how we have obtained the terminal conditions for both $\v(x,\T)$ and
 $p(x,\T)$ in our calculations above.
 
 \bibliographystyle{plain}
-% \bibliographystyle{unsrt}
-% \bibliographystyle{bmc_article}
-% \section*{References}  \bibliographystyle{iopartnum}   
+\bibliographystyle{unsrt}
+\bibliographystyle{bmc_article}
+\section*{References}
+\bibliographystyle{iopartnum}
 \bibliography{library,local}
 
 \end{document}
