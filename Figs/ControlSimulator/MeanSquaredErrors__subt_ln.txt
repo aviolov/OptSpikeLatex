@@ -1,2 +1,2 @@
-\begin{tabular}{l|p{4.5cm} p{4.5cm}} 
+\begin{tabular}{l|p{4.9cm} p{4.5cm}} 
 Control Law &Average  Squared Spike-Time Deviation (N=10000) &Expected Squared Spike-Time Deviation (theory)\\ \hline Deterministic & 0.328 & --\\  Open-Loop & 0.143 & 0.151 \\  Closed-Loop & 0.093 & 0.098 \\ \hline\end{tabular}
