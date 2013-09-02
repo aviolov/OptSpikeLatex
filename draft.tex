@@ -1015,15 +1015,16 @@ stochastic control.}
 We now turn to the ultimate goal of our analysis, the control of {\sl spike
 trains}. In particular, we will generate $M=10$ realizations of $N=20$ spikes
 each in an attempt to meet a prescribed spike train. We will focus on two
-regimes, the sub-threshold regime with either low or high noise.
+regimes, the Supra-Threshold regime with either low or high noise.
 The results
-for parameters from the Sub-Threshold, Low-Noise regime are shown in
-results in \cref{fig:targettrain_cl_lownoise,fig:targettrain_ol_lownoise}.
-While, the results
-for parameters from the Sub-Threshold, High-Noise regime are shown in
+for parameters from the low-noise regime are shown in
+results in \cref{fig:targettrain_cl_lownoise,fig:targettrain_ol_lownoise}, 
+while, the results
+for the high-noise regime are shown in
 results in
-\cref{fig:targettrain_cl_SUPT_HN,fig:targettrain_cl_SUPT_ln,fig:targettrain_ol_SUPT_ln,fig:targettrain_ol_SUPT_HN}.
-%\usepackage{graphics} is needed for \includegraphics
+\cref{fig:targettrain_cl_highnoise,fig:targettrain_ol_highnoise}. In all cases,
+the target train is obtained by a simulation of the Supra-Threshold High Noise
+regime with no additional control, i.e.\ $\a(\cdot) = 0$.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%% SUPER-THRESHOLD REGIME LOW-NOISe:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1036,7 +1037,7 @@ results in
   parameters from the Super-Threshold, High-Noise regime, without an applied
   control, $\a=0$.
   There are $N=16$ spikes and $M=10$ realizations of the control strategy} 
-  \label{fig:targettrain_cl_SUPT_ln}
+  \label{fig:targettrain_cl_lownoise}
 \end{center}
 \end{figure}  
 \begin{figure}[htp] 
@@ -1048,7 +1049,7 @@ results in
   parameters from the Super-Threshold, High-Noise regime, without an applied
   control, $\a=0$.
   There are $N=16$ spikes and $M=10$ realizations of the control strategy}
-  \label{fig:targettrain_ol_SUPT_ln}
+  \label{fig:targettrain_ol_lownoise}
 \end{center} 
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1063,7 +1064,7 @@ results in
   parameters from the Super-Threshold, High-Noise regime, without an applied
   control, $\a=0$.
   There are $N=16$ spikes and $M=10$ realizations of the control strategy}
-  \label{fig:targettrain_cl_SUPT_HN}
+  \label{fig:targettrain_cl_highnoise}
 \end{center} 
 \end{figure}
 \begin{figure}[htp]
@@ -1075,7 +1076,7 @@ results in
   parameters from the Super-Threshold, High-Noise regime, without an applied
   control, $\a=0$.
   There are $N=16$ spikes and $M=10$ realizations of the control strategy}
-  \label{fig:targettrain_ol_SUPT_HN}    
+  \label{fig:targettrain_ol_highnoise}    
 \end{center}
 \end{figure}
 
