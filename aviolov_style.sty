@@ -6,6 +6,7 @@
 \newcommand{\floor}[1]{\lfloor #1 \rfloor }
 \newcommand{\intd}[1]{\, \mathrm{d} #1}
 \newcommand{\ceil}[1]{\lceil #1 \rceil }
+% \newcommand{\sign}[1]{ \textrm{\lceil #1 \rceil }
 \newcommand{\argmax}{\operatornamewithlimits{arg\,max}}
 \newcommand{\argmin}{\operatornamewithlimits{arg\,min}}
 \newcommand{\argsup}{\operatornamewithlimits{arg\,sup}}
@@ -13,11 +14,12 @@
 % \newcommand{\sgn}{\operatorname{sgn}}
 \DeclareMathOperator{\sgn}{sgn}
 \DeclareMathOperator{\Prob}{Prob}
-\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Exp}{ \mathbbmtt{E}  } %the expectation operator
+\DeclareMathOperator{\Var}{ \mathbbmtt{V}ar  } %the variance operator
+% \DeclareMathOperator{\Var}{Var}
 \DeclareMathOperator{\Tr}{Tr}
 \DeclareMathOperator{\LT}{ \mathscr{L} } %Laplace
 \DeclareMathOperator{\FT}{ \mathscr{F} } %Fourier
-\DeclareMathOperator{\Exp}{ \mathbbmtt{E}  } %the expectation operator
 \DeclareMathOperator{\Ham}{ \mathcal{H} } %Hamiltonian!
 \DeclareMathOperator{\proj}{proj}
 
@@ -34,6 +36,7 @@
 
 %%ARROWS:
 \def    \ra     {{\rightarrow}}
+\def    \la     {{\leftarrow}}
 \def    \Lra    {{\longrightarrow}}
 \def    \iff    {{\Leftrightarrow}}
 % \def    \pl     {{\hookrightarrow}}
