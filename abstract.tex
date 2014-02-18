@@ -1,0 +1,114 @@
+\documentclass[12pt]{iopart}
+%\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amscd}
+\usepackage{amssymb} 
+\usepackage{amsfonts}     
+\usepackage{amsthm}
+\usepackage{amsfonts} 
+\usepackage{amsthm} 
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,snakes,backgrounds}
+% \usepackage{circuitikz}
+% \usepackage{pgf}
+% \usetikz
+\usepackage{subfig}
+
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+
+\usepackage[super]{nth}
+\usepackage{appendix}
+% \usepackage{listings}
+\usepackage{color}
+
+\usepackage{hyperref}
+%\usepackage{url}
+
+\usepackage{cleveref}
+\usepackage{cancel}
+\usepackage{slashbox}
+
+\usepackage{aviolov_style}
+\usepackage{local_style}
+
+\usepackage{iopams}
+
+% \newtheorem{thm}{Theorem}[section]
+% \newtheorem{lemma}{Theorem}[thm]
+% \theoremstyle{definition}
+% \newtheorem{ex}{Example}[thm]
+% \newtheorem{defn}{Definition}[thm]
+
+% \def\includegraphic{}
+% \def\includegraphics{}
+ 
+\begin{document} 
+
+
+\title{Stochastic Optimal Control of Single Neuron Spike Trains}
+\author{Alexandre Iolov$^{1,2}$, Susanne Ditlevsen$^2$, Andr\'e Longtin$^{1,3}$ 
+		}	
+\address{%
+     (1) Department of Mathematics and Statistics, University of Ottawa, Ottawa,
+    Canada
+\\
+    (2) Department of Mathematical Sciences, University of Copenhagen,
+Copenhagen, Denmark
+\\
+    (3) Department of Physics, University of Ottawa,
+    Ottawa, Canada
+}
+\ead{aiolo040@uottawa.ca}			
+% \address{Department of Mathematics and Statistics, University of Ottawa, Ottawa, Canada 
+% \\ Department of Mathematical Sciences, University of Copenhagen, Copenhagen,
+% Denmark }
+% \ead{$<$\href{mailto:aiolo040@uottawa.ca}
+% 		{aiolo040 at uottawa dot ca}$>$}
+
+% \date{\today}
+
+\begin{abstract}
+We have devised an algorithm for eliciting exact spike times from a noisy
+neuron. The strategy is especially designed to deal with a significant
+stochastic component in the impinging current and is applicable in both
+Supra- and Sub-threshold regimes. Depending on the measurements available to
+the controller, this involves solving a Hamilton-Jacobi-Bellman PDE or a pair of
+Kolmogorov PDEs (Forward and Backward). We provide a numerical implementation of
+the control strategy and test its performance in simulations for a variety of
+possible parameter regimes. 
+
+\end{abstract}
+
+\maketitle
+
+\section{Novelty and Significance}
+External control of exact spike times in single neurons is important for
+understanding neuronal activity and has potential in brain-machine interfaces,
+for improving neural prostheses, and in medical applications to neuronal
+disorders, such as Parkinson's disease or epilepsy. The goal of this paper is
+the design of optimal controlled electrical stimulation patterns to a cell to
+achieve a target spike train under physiological constraints not to damage
+tissue. We pose a stochastic optimal control problem to precisely specify the
+spike times in a noisy leaky integrate-and-fire model of a neuron. In
+particular, we allow for noise of arbitrary intensity. The optimal control
+problem is solved using Dynamic Programming if the controller has access to the
+voltage (closed-loop control) and using a Maximum Principle for the transition
+density if the controller only has access to the spike times (open-loop
+control). The techniques are applicable in both the supra-threshold and
+sub-threshold regimes. Given this scope, our simulations show that our
+algorithms produce the desired results. They further reveal that the numerical
+demands are non-trivial, such that the algorithms may require efficiency
+refinements to achieve real-time control, in particular the open-loop context is
+more numerically demanding than the closed-loop one. Furthermore, we show how
+wrong the control strategy can perform if we assume that the noise is
+negligible.  More precise targeting and control of neural activity to achieve
+optimal performance in a noisy environment, in which most neurons are embedded,
+have great potential in health care. The main contribution is the online
+feedback control of a noisy system through modulation of the input, taking into
+account physiological constraints on the control, as well as incurred costs to
+diminish adverse effects.
+
+\end{document}

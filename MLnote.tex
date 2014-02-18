@@ -1,0 +1,657 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amscd}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amsthm} 
+%\usepackage{circuitikz}
+% \usepackage{pgf}
+% \usepackage{tikz} 
+% \usetikzlibrary{arrows,snakes,backgrounds}
+% \usetikz
+% \usepackage{verbatim} 
+\usepackage{subfig} 
+\usepackage{graphicx}
+\newtheorem*{rep}{Reply}
+% \usepackage[super]{nth}
+% \usepackage{appendix}
+% \usepackage{listings}
+% \usepackage{color}
+
+\usepackage{hyperref}
+\usepackage{url}
+
+\usepackage{cleveref}
+\usepackage{aviolov_style}
+\usepackage{local_style}
+ 
+\begin{document}
+
+\title{Spike-Controlling the Noisy ML Model} 
+
+\author{Alexandre Iolov, 
+Susanne Ditlevsen 
+and
+Andr\'e Longtin
+}
+\date{\today}
+
+\maketitle 
+
+\tableofcontents
+
+\section{Stochastic Morris-Lecar Model}
+\subsection{Diffusion model}
+\def \Vt {{ U_s }} \def \Wt {{ W_s }} \def \Vz {{ U_z}} \def \Wz {{ W_z}} The
+stochastic Morris-Lecar model including both current and channel noise is
+defined as the solution to
+\begin{equation}
+\left\{
+\begin{array}{ccl}
+d\Vt &=& f(\Vt,\Wt)dt +\gamma d\tilde{B}_s,\\
+d\Wt&=&b(\Vt,\Wt) dt  \, + \sigma(\Vt,\Wt)dB_s,
+\end{array}
+\right.
+\tag{ML}
+\label{eq:ML}
+\end{equation}
+where 
+\begin{eqnarray*}
+f(\Vt,\Wt)&=&\frac{1}{C}\Big(-g_{Ca}m_\infty(\Vt) (\Vt-V_{C_a})
+\\ && - g_K\Wt(\Vt-V_K)
+-g_L(\Vt-V_L)+I + A(s) \Big),
+\\ b(\Vt,\Wt)&=&
+\left(\alpha(\Vt)(1-\Wt) - \beta(\Vt)\Wt\right),\\ m_\infty(v)&=&\frac{1}{2}\left(1+\tanh\left(\frac{v-V_1}{V_2}\right)\right),\\
+\alpha(v) &=& \frac{1}{2}\phi \cosh\left(\frac{v-V_3}{2V_4}\right)\left(1+\tanh\left(\frac{v-V_3}{V_4}\right)\right),\\
+\beta(v) &=& \frac{1}{2}\phi \cosh\left(\frac{v-V_3}{2V_4}\right)\left(1-\tanh\left(\frac{v-V_3}{V_4}\right)\right),
+\end{eqnarray*}
+
+and the initial condition $(\Vz, \Wz)$ is random  with density $p(\Vz, \Wz)$.
+ Processes $(\tilde{B}_s)_{s\geq s_0}$ and $(B_s)_{s\geq s_0}$ are independent
+ Brownian motions.
+The variable $\Vt$ represents the membrane potential of the neuron at time $s$,
+and $\Wt$ represents the normalized conductance of the K$^+$ current. It varies
+between 0 and 1, and can be interpreted as the probability that a K$^+$ ion
+channel is open at time $t$. The equation for $f(\cdot)$ describing the dynamics
+of $V_t$ contains four terms, corresponding to Ca$^{2+}$ current, K$^+$ current,
+a general leak current, the input current $I$ AND THE EXTERNAL CONTROL CURRENT
+$A(s)$!
+  
+ The functions $\alpha
+  (\cdot )$ and $\beta (\cdot )$ model the rates of opening and closing of the
+  K$^+$ ion channels. The function $m_{\infty}(\cdot)$ represents the
+  equilibrium value of the normalized Ca$^{2+}$ conductance for a given value of
+  the membrane potential. The parameters $V_1, V_2, V_3$ and $V_4$ are scaling
+  parameters; $g_{Ca}, g_K$ and $g_L$ are conductances associated with
+  Ca$^{2+}$, K$^{+}$ and leak currents; $V_{Ca}, V_K$ and $V_L$ are reversal
+  potentials for Ca$^{2+}$, K$^+$ and leak currents; $C$ is the membrane
+  capacitance; $\phi$ is a rate scaling parameter for the opening and closing of
+  the K$^+$ ion channels; and $I$ is the input current.
+
+\begin{center}
+\begin{figure}
+\subfloat[Type 1]{
+\includegraphics[width=.5\textwidth]{Figs/MLBox/ML_type1_example_traj.pdf}
+\label{fig:simu_ML_1} 
+}
+\subfloat[Type 2]{
+\includegraphics[width=.5\textwidth]{Figs/MLBox/ML_type2_example_traj.pdf}
+\label{fig:simu_ML_2}
+}
+
+\caption{Simulated trajectory of the stochastic 
+  Morris-Lecar model: $(\Vt)$ as a function of time (top),
+  $(\Wt)$ as a function of time (bottom). Parameters are given in Section
+  \ref{sec:simulation}. Time is measured in ms, voltage in mV,
+  the conductance is normalized between 0 and 1. }
+ \label{fig:simu_ML} 
+\end{figure}
+\end{center}
+
+Various noise sources are present in single neurons, and they act on many
+different spatial and temporal scales \citep{Gerstner2005,Longtin2013}. A main
+component arises from the synaptic bombardment from other neurons in the
+network, and in the diffusion limit appears as an additive noise on the current
+equation. Parameter $\gamma$ scales this current noise. Conductance fluctuations
+caused by random opening and closing of ion channels leads to multiplicative
+noise on the conductance equation. Function $\sigma(\Vt,\Wt)$ models this
+channel or conductance noise. We consider the following function that ensures
+that $\Wt$ stays bounded in the unit interval  if $\sigma \leq 1$
+\citep{DitlevsenGreenwood2011}: $$\sigma(\Vt, \Wt ) = \sigma \sqrt{2
+\frac{\alpha(\Vt) \beta(\Vt)}{\alpha(\Vt)+ \beta(\Vt)} \Wt (1-\Wt)}. $$
+A strajectory of the model is simulated in Fig. \ref{fig:simu_ML}. The peaks of
+$(\Vt)$ correspond to spikes of the neuron.
+\subsection{Simulation study}\label{sec:simulation}
+Parameter values of the Morris-Lecar model used in the simulations are the same
+as those of \citep{RinzelErmentrout1989,Tateno2004} for a class I and for a
+class II membrane.
+ 
+The values are:\\ 
+% \begin{verbatim}
+\input{Figs/MLBox/MLParams_type1.txt}
+% \end{verbatim}
+AND \\
+% \begin{verbatim}
+\input{Figs/MLBox/MLParams_type2.txt}
+% \end{verbatim}
+
+% $V_K = -84$ mV, $V_L = -60$ mV, $V_{Ca} = 120$ mV, $C = 1\,
+% \mu$F/cm$^2$, $g_L = 0.1\, \mu$S/cm$^2$, $g_{Ca} = 0.22 \,
+% \mu$S/cm$^2$, $g_K = 0.4\, \mu$S/cm$^2$, $V_1 = -1.2$ mV, $V_2 = 18$ mV,
+% $V_3 = 2$ mV, $V_4 = 30$ mV, $\phi = 0.04$ $\mbox{ms}^{-1}$.  
+% Input is chosen to be $I = 90 \, \mu$A/cm$^2$.
+
+(The values are from Susanne's code, in Andre's code the values are normalized
+st $C= 1$ and there is no noise, whereas in Susanne's code the parameter values
+for $\s, \g$ are given and so I don't have to rederive them)
+
+Initial conditions for the Morris-Lecar model are $V_{t_0} = -26$ mV, $W_{t_0} =
+0.2$. 
+
+Trajectories are simulated with time step $\Delta
+t=0.01$ ms.  An example of a simulated trajectory is
+given in Figure \ref{fig:simu_ML}.
+
+IMPORTANT: From now on we will use data generated from a TYPE I (One) Model, as
+it is deemed more suitable to be well-fitted by an LIF model.
+
+\section{Morris Lecar $<->$ LIF conversion}
+We consider how to go about converting $V,W,s$ data from the Morris-Lecar modelinto $Y,s$ data from the (dimensional) LIF model,
+ 
+\begin{equation}
+\begin{gathered}
+dY(s) = \frac 1C \left( m + A(s) - Y  \right) \intd{s} + \s \intd{B_s},
+\\
+Y(\ss) = \yth \implies
+\begin{cases}
+Y(\ss^+) = \yreset & 
+\end{cases}
+\end{gathered}
+\tag{OU:dim}
+\label{eq:LIF_dimenisonal}
+\end{equation}
+Which in turn can be transformed into the non-dimensional LIF model, which is
+used to determine the control algorithm:
+\begin{equation}
+\begin{gathered}
+dX(t) = \left(\m + \a(t) - \frac{X(t)}{\tc} \right) \intd{t} + \b \intd{B_t},
+\\
+X(\ts) = 1 \implies
+\begin{cases}
+X(\ts^+) = 0 & 
+\end{cases}
+\end{gathered}
+\tag{OU:non-dim}
+\label{eq:LIF_non_dimenisonal}
+\end{equation}
+We use the same symbol $C$ in both \cref{eq:ML} and \cref{eq:LIF_dimenisonal}
+because the two models never really 'talk' to each other through their parameters. The
+two models only see each other through their data, 
+In particular given data from \cref{eq:ML} we estimate the
+parameters $C, m,\s, \yth, \yreset$ in \cref{eq:LIF_dimenisonal}. But we neverestimate (know) the parameter $C$ in the Morris-Lecar model, in fact as far aswe are concerned, the M-L data comes from a Black Box. 
+
+We will need to know how to perform the following tasks:
+\begin{enumerate}
+  \item Given $V,s$ how to estimate $m, Cc, \s$ (In general estimating
+  Ornstein-Uhlenbeck parameters is fairly straightforward, but only given OU
+  data)
+  
+  \item determine the physical threshold and reset $\yth, \yreset$
+  
+  \item Given an optimal control $\a(x,t)$ determined in the $X,t$ domain,
+  convert to $A(Y, s)$ in the $Y,s$ domain. (And then apply $A$ to $V$ in the
+  ML model).
+\end{enumerate}
+
+\subsection{Converting the OU model from dimensional to non-dimensional form
+and back}
+Let's start with the translation between $Y,s$ and $X,t$. First we
+normalize $X$ to reset to 0 and spike at $1$. With that we have that $X_t =
+\frac{Y_s - \yreset}{\yth - \yreset} $. We also non-dimensionalize time, using $\meanI$,
+which is the mean observed ISI. (Alternatively, we could normalize by the mean
+ISI of the target train. We'll use the same symbol in any case) $$ t = \frac
+s\meanI$$
+
+Let us write, $G$ for gap.
+$$G = \yth - \yreset$$
+b/c the expression $\yth - \yreset$  occurs quite often. 
+
+Now we can do the conversions:
+\begin{eqnarray*}
+\Delta Y =&
+	\frac 1 C (m + A - Y) \Delta s +
+ 	\s \sqrt{\Delta s} \cdot \xi \\
+\frac {\Delta Y}{G} =&
+	\frac {\meanI}{GC} (m - \yreset + A - (Y-\yreset))\frac{\Delta s}{\meanI} +
+	\frac{\s}{G} \cdot \sqrt{\meanI} \sqrt{\frac{\Delta s}{\meanI}} \cdot \xi
+\\
+\Delta X  = &
+	(\frac{\meanI (m - \yreset)}{GC} + \frac {\meanI\cdot A}{GC} -
+	\frac{\meanI}{C} X) \Delta t +  
+	\frac{\s}{G} \cdot \sqrt{\meanI} \sqrt{\Delta t} \cdot \xi
+\end{eqnarray*}
+From this we can read off, $\m, \tc, \b, \a$. We have:
+\begin{subequations}
+\begin{eqnarray}
+X_t = \frac{Y_s - \yreset}{\yth - \yreset} 
+& \iff  &
+ Y_s =  \ldots
+\\ 
+t = \frac s \meanI &
+\iff & s = \meanI t
+\\
+\m = \frac{\meanI (m - \yreset)}{C\cdot G}
+& \iff &
+m = \ldots   
+\\
+\a() = \frac{\meanI \cdot A()}{GC}
+&\iff&
+A() = \frac{GC \cdot \alpha() }{\meanI}
+\\
+\tc = \frac{ C }{\meanI }
+&\iff&
+C = \ldots
+\\
+\b = \frac{\s \sqrt{\meanI} }{\yth - \yreset}
+&\iff&
+\s =\ldots
+\end{eqnarray}
+\end{subequations}
+
+We've used \ldots to indicate conversions that will never be made, so they do
+not matter. (We will never go $\mu \ra m$).
+
+To indicate that we've done everything correct we show two trajectories $Y_s,
+X_t$ in \cref{fig:OU_dim2nondim_conversions}.
+%\usepackage{graphics} is needed for \includegraphics
+\begin{figure}[htp]
+\begin{center}
+  \includegraphics[width=\textwidth]{Figs/MLBox/OUDim2NonDimConversion.pdf}
+  \caption[labelInTOC]{Conversions between $Y_s\ra X_t$. 
+  Top plot is a chunk of $Y$ data. Below is a chunk of $X$ data using the conversion params.
+  Also below we plot the original $Y$ chunk from above converted to $X$.
+  Obviously we've used the same stream of random numbers. The parameters work
+  out to be:
+  meanISI = 189.11,\\
+$m = -16.91 C = 132.72 \sigma = 1.00$ \\ 
+$\mu = 1.39 \tc = 0.70 \beta = 0.40 $.\\ 
+The physical parameters, $m,C,\sigma $ are obtained from
+\cref{sec:estimaing_LIF_from_ML}}
+\label{fig:OU_dim2nondim_conversions}
+\end{center}
+\end{figure} 
+
+
+\subsection{Estimating the LIF params from ML data}
+\label{sec:estimaing_LIF_from_ML}
+This estimation and in general the relation between $Y$ and $V$ is the most
+challenging aspect of the whole problem!
+
+It is difficult to unambiguously determine what if anything is the threshold,
+the point-of-no-return for $V$ in \cref{fig:simu_ML}. But it looks to be about
+-14.0. In addition we stipulate a lower threshold, at -22, which is the point
+after which we no longer consider the data as suitable to be represented as an
+OU process. Thus rises the question of what to do between (-22 and -14). We will
+say that this is a grey zone where the diffusion has almost spiked: $X = 1-
+\epsilon$, say $X = .999$
+
+Let's plow ahead! \Cref{fig:ML_estimates_data} shows the original $V,s$ data,
+plus an identification of the spikes, using a completely arbitrarily chosen
+threshold, $\yth = -14$. A spike is recorded when $V$ (equivalently $Y$) crosses
+$\yth$. 
+
+Once a spike is recorded, we wait an absolute refractory time of $$t_{ref} =
+40 ms$$ at which point we restart. As such the time between $\ts$ and
+$\ts+t_{ref}$ is compactified to a point as far as the LIF is concerned. I've
+played around with different values of $t_{ref}$ and $40 ms$ seems to give the
+best results. In particular notice on the bottom plot in
+\cref{fig:ML_estimates_data} how all trajectories converge more or less to the
+same point. Visually, this uniform reset effect is achieved for any $t_{ref} \in
+[37, 43]ms$.
+
+The data between the reset time and the OU bound crossing time is used for
+parameter estimation. (It is plotted in the middle plot in \cref{fig:ML_estimates_data})
+
+\begin{figure}[htp]
+\begin{center}
+  \includegraphics[width=\textwidth]{Figs/MLBox/ML_estimates_annotated.pdf} 
+  \caption[labelInTOC]{Annotating (spike-segmenting) the Raw ML data. 
+  This is the same data as in \cref{fig:simu_ML_1} (redrawn in top plot).
+  The middle plot shows the data segments that are used to estimate the OU
+  parameters from ML data.
+  The bottom plot shows the stereotypical spike shape and justifies why 40 ms
+  is a reasonable refractory time}
+  \label{fig:ML_estimates_data} 
+\end{center}
+\end{figure} 
+Now we want to estimate $m, C, \s$ from a chunk of Morris-Lecar generated data.
+
+Let's recall the MaxLikelihood formulas for the parameters of the non-threshold,
+$A\equiv 0$ OU process in \cref{eq:LIF_dimenisonal} given discrete
+observations, $\{Y_n\}_{n=0}^{N}$:
+\begin{subequations}
+\begin{eqnarray}
+\hat{ m} &=&  \frac{ \sum_{n=1}^{N} \left( Y_n - e^{-\frac {\Delta} {\hat C}}
+Y_{n-1} \right)} {N ( 1-e^{-\frac {\Delta} {\hat C}})}
+\\
+ 0 &=& e^{-\frac {\Delta}{\hat{C}} } -
+  \frac { \sum_{n=1}^{N} ( Y_n - \hat m)( Y_{n-1} - \hat m) }
+  	   { \sum_{n=1}^{N} \left( Y_{n-1} - \hat m \right)^2 } 
+\\
+\hat\s^2 &=& 
+2\frac{ \sum_{n=2}^{N}  \left( Y_n - \hat m - (Y_{n-1} -
+\hat m) e^{-\frac {\Delta} {\hat C}} \right)^2 } 
+	  {N \cdot (1-e^{-2\frac {\Delta} {\hat C}}) \hat C}
+\end{eqnarray}
+\end{subequations}
+This is for one uninterupted sample. However, we have $K$ distinct paths
+each consisting of $N_k+1$ data points ($N_k$ transitions). Thus we must
+generalize the formulas:
+\begin{eqnarray*}
+\hat{ m} &=& 
+\frac{ \sum_{k=1}^K \sum_{n=1}^{N_k} \left( Y^{(k)}_n - e^{-\frac{\Delta_n} {\hat C}} Y^{(k)}_{n-1} \right)} 
+	 { N( 1-e^{-\frac {\Delta_n} {\hat C})}}
+\\
+0 &=& e^{-K\frac {\Delta}{\hat{C}} } - 
+\prod_{k=1}^K\left[ \frac { \sum_{n=1}^{N_k} ( Y^{(k)}_n - \hat m)(Y^{(k)}_{n-1} - \hat m) }
+						  { \sum_{n=1}^{N_k} \left( Y^{(k)}_{n-1} - \hat m \right)^2 } 
+  	    \right]
+\\
+\hat\s^2 &=&  
+2\frac{ \sum_{k=1}^K \sum_{n=2}^{N}  \left( Y^{(k)}_n - \hat m - (Y^{(k)}_{n-1} -
+\hat m) e^{-\frac {\Delta} {\hat C}} \right)^2 } 
+	  { N (1-e^{-2\frac {\Delta} {\hat C}}) \hat C}
+\end{eqnarray*}
+Where $N= \sum_k N_k$
+  
+Now we are ready to estimate $m, C, \s$ given data from the ML trajectories.
+Given a stream of ML-Type 1 data points, we get the estimates in
+\cref{tab:OU_from_ML1_ests}.
+\begin{table}
+\begin{tabular}{l|cc}
+\input{Figs/MLBox/OU_from_ML1_estimates.txt}
+\end{tabular}
+\caption{Estimates for the three OU parameters $m, C, \s$ given data from an ML
+type 1 model (middle-column) and then from an OU model ran with the estimated
+parameters of the ML 1 model (right column)}
+\label{tab:OU_from_ML1_ests}
+\end{table}
+Then, if we run the OU model with the inferred parameters from
+\cref{tab:OU_from_ML1_ests} (the ML1 column), we get the OU trajectories in
+\cref{fig:OU_vs_ML1}. Finally, recalling the conversions of $Y$ to $X$ to
+non-dimensionalize the OU process gives us the values for $\m,\tc, \s$ in
+\cref{tab:OU_nondim_vs_OU_dim}. This is a very interesting parameter regime. 
+It is sub-threshold, $\bar X \approx .66$, but the noise strength is halfway
+between what we called Low-Noise $\b=.3$ and High-Noise $\b=1.5$. We know our
+control is very good 
+
+In \cref{tab:OU_nondim_vs_OU_dim}, we can also consider the bounds on our
+control. We've assumed that $$A(s) \in [\pm 20]$$. We see that this gives
+us quite wide bounds on $\a(\cdot)$. Recall that so far we have used $\a \in
+[-2,2]$ and we've only needed more 'oomph' in the case of high-noise, i.e.\
+$\b=1.5$, whereas here we have the milder $\b=0.7$. Also the time-constant is
+pretty small, meaning, we have a pretty stiff system, i.e.\ one which quickly
+mean-reverts to the base-line $0$.
+
+
+\begin{figure}[htp]
+\begin{center}
+  \includegraphics[width=\textwidth]{Figs/MLBox/OU_from_ML_type1_Tf2000.pdf}
+  \caption[labelInTOC]{The original Type 1 ML sub-threshold dynamics vs.\ OU
+  dynamics. Notice that the OU dynamics are generated using the exact same
+  $Y_0$ and the SAME stream of random numbers as those that generate the ML1
+  dynamics. It is clear that the match (OU of ML1) is satisfactory.} 
+  \label{fig:OU_vs_ML1}
+\end{center} 
+\end{figure}
+
+\begin{table}
+\begin{align*}
+\input{Figs/MLBox/OUDims2Nondims.txt}
+\end{align*} 
+\caption{Estimates for the three OU parameters $m, C, \s$ and their 
+non-dimensional counterparts, $\mu , \tc ,\beta$} 
+\label{tab:OU_nondim_vs_OU_dim}
+\end{table}
+
+\clearpage
+
+\section{Controlling the Morris-Lecar model}
+\label{sec:controlling_ML}
+We now have all the pieces to control the Morris-Lecar model. Here is a summary:
+\begin{enumerate}
+  \item Before doing anything estimate the LIF params, $m, C, \s$ (we've
+  already done this) and their conversions to non-dimensional form $\mu , \tc
+  ,\beta$
+  \item Take a series of target spike times, we will use the spikes generated by
+  the model in 
+  \item Given $V_s$, treat it like $Y_s$ and convert, $Y_s$ into $X_t$. Convert
+  the remaining time-to-spike from $s \ra t$. 
+  \item determine the optimal $\a(t, X_t)$ from closed or open-loop. 
+  \item convert $\a()$ into $A(s)$
+  \item Apply $A(s)$ to the $dV_s$ system.
+  \item Rinse and repeat  
+\end{enumerate} 
+
+Ok, let's skip to the chase - the results are in
+\cref{fig:ML_controled_simulation_cl} and \cref{fig:ML_controled_simulation_ol}.
+It is clear that the control strategy (for closed-loop) is highly accurate! This
+might have much to do with the fact that we have assumed such wide $A$ bounds.
+$$A(s) \in [\pm 20]$$ $$\implies \a(t) \in [\pm 4.7]$$
+
+Should we reduce the power bounds\ldots? In general how should we come up with
+the values for $A_{min}, A_{max}$?!
+
+For reference
+\cref{fig:ML_controled_simulation_cl_A10,fig:ML_controled_simulation_ol_A10}
+give the results for $$A_{min}, A_{max} = [-10,10]$$.
+
+%%%%%%%%%%%% CL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h]
+\begin{center}
+\subfloat[example controlled trajectory]
+{
+\label{fig:ML_example_controled_traj}
+\includegraphics[width=\textwidth]
+{Figs/MLTrainController/MLSim_example_cl.pdf} 
+}\\
+\subfloat[raster plot for controlled simulations]
+{
+\label{fig:ML_raster_plot}
+\includegraphics[width=\textwidth] 
+{Figs/MLTrainController/MLSim_raster_cl.pdf}
+}
+\caption[labelInTOC]{Example of a controlled ML trajectory and the raster plot
+of realized spikes vs.\ controlled spikes, $N=5$ 	(Closed-Loop!)}
+\label{fig:ML_controled_simulation_cl}
+\end{center} 
+\end{figure}
+%%%%%%%%%%%% OL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h] 
+\begin{center}
+\subfloat[example controlled trajectory]
+{
+\label{fig:ML_example_controled_traj}
+\includegraphics[width=\textwidth]
+{Figs/MLTrainController/MLSim_example_ol.pdf} 
+}\\
+\subfloat[raster plot for controlled simulations]
+{
+\label{fig:ML_raster_plot}
+\includegraphics[width=\textwidth]
+{Figs/MLTrainController/MLSim_raster_ol.pdf} 
+}
+\caption[labelInTOC]{Example of a controlled ML trajectory and the raster plot
+of realized spikes vs.\ controlled spikes, $N=4$ 	(Open-Loop!)}
+\label{fig:ML_controled_simulation_ol}
+\end{center} 
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% REDUCED POWER BOUNDS: %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%% CL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h]
+\begin{center}
+\subfloat[example controlled trajectory]
+{
+\label{fig:ML_example_controled_traj}
+\includegraphics[width=\textwidth]
+{Figs/MLTrainController/MLSim_example_cl_Amax10.pdf} 
+}\\
+\subfloat[raster plot for controlled simulations]
+{
+\label{fig:ML_raster_plot}
+\includegraphics[width=\textwidth] 
+{Figs/MLTrainController/MLSim_raster_cl_Amax10.pdf}
+}
+\caption[labelInTOC]{Same as \cref{fig:ML_controled_simulation_cl}
+(closed-loop) but with reduced power bounds $A \in [-10,10]$}
+\label{fig:ML_controled_simulation_cl_A10} 
+\end{center}
+\end{figure}
+%%%%%%%%%%%% OL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h] 
+\begin{center}
+\subfloat[example controlled trajectory]
+{
+\label{fig:ML_example_controled_traj}
+\includegraphics[width=\textwidth]
+{Figs/MLTrainController/MLSim_example_ol_Amax10.pdf} 
+}\\
+\subfloat[raster plot for controlled simulations]
+{
+\label{fig:ML_raster_plot}
+\includegraphics[width=\textwidth]
+{Figs/MLTrainController/MLSim_raster_ol_Amax10.pdf} 
+}
+\caption[labelInTOC]{Same as \cref{fig:ML_controled_simulation_ol}
+(open-loop) but with reduced power bounds $A \in [-10,10]$}
+\label{fig:ML_controled_simulation_ol_A10}
+\end{center}
+\end{figure}
+
+\clearpage
+
+\section{Morris Lecar $<->$ LIF conversion - Spikes-Only}
+It remains to do one more thing - estimate the LIF parameters from Spike-Data
+only. 
+
+However, we know that estimating $\tc$ from spikes is problemeatic. To keep
+things simple at first. We assume we know $\tc$ (we'll use the estimated value
+from the \cref{tab:OU_from_ML1_ests}) and only estimate $\m, \b$, the mean
+bias current and the noise intensity.
+
+We use the Ditlevsen-Lansky scheme that utilizes the Fortet eqn to estimate
+$\m, \b$ - \cite{Ditlevsen2007}.
+
+In short, first we scale time by $C$ and we introduce a unit-tau-char variable
+$Z$
+$$
+dZ = (a- Z) dt + bdW_t$$
+with the relation between $a,b$ being
+$$
+a = \frac{m - \yreset}{\yth - \yreset} 
+	\quad \iff \quad 
+		 m = a \cdot (\yth - \yreset) + \yreset
+$$
+$$
+b  = \frac{\sigma \sqrt{C}}{\yth - \yreset} 
+	\quad \iff \quad  
+		\s = \frac{b \cdot (\yth - \yreset)}{\sqrt{C}} 
+$$
+
+We estimate $a,b$ by minimizing the Fortet error and off we go. The estimates
+are given in \cref{tab:OU_from_ML1spikes_ests} ($N=92$ spikes (20 secs.)). We
+see that the estimates are quite accurate meaning that the spikes only estimates are no more
+than $10$\% off from the estimates using detailed trajectories (in
+\cref{tab:OU_from_ML1_ests}.
+
+It remains to be seen whether this error has any discernible effect on the
+control performance (It is plausible that the performance is imporved)
+
+An aside/caveat: the Fortet estimator seems to be quite sensitive to
+initial conditions, meaning that if you give it a too small guess for $\s$ is estimates
+the noise intensity as $0$ (Possible bug of mine, I don't know).
+\begin{table}
+\begin{tabular}{l|c}
+\input{Figs/MLBox/OU_from_ML1_estimates_spikes_only.txt}
+\end{tabular}
+\caption{SPIKES-ONLY: Estimates for the three OU parameters $m, C, \s$ given
+data from an ML type 1 model (middle-column) and then from an OU model ran with the estimated
+parameters of the ML 1 model (right column)}
+\label{tab:OU_from_ML1spikes_ests}
+\end{table}
+
+\begin{table}
+\begin{align*}
+\mu &= 2.99 &\tc &= 0.22 &\beta &= 0.70
+\\
+\mu &=3.64  &\tc &= 0.22  &\beta &= 0.57
+\end{align*} 
+\caption{Estimates for the three non-dim OU parameters $\mu , \tc ,\beta$
+Top: Voltage tracings, Bottom (Spikes-Only). recall that $\tc$ is artificially
+set in the spikes only, which is why the two are the same!}
+\label{tab:OU_nondim_voltage_vs_spikesonly}
+\end{table}
+
+\subsection{ML Control based on Spike-only estimates}
+The final thing to do is control the ML model using the open-loop controller
+based on the spikes only measurements. (It seems unnecessary to show the
+performance of the closed-loop controller on spikes-only estimates - If you
+can close-loop control, then you can voltage-estimate\ldots)
+
+The performance is shown in
+\cref{fig:ML_controled_simulation_ol_A10_spikesonly}. 
+
+Now Susanne suggested that the arbitrary, un-identifiable value of $C$ be fixed
+to something external (from 'above'). Ok, let's do this, we set $C=20$ and show
+the open-loop results in
+\cref{fig:ML_controled_simulation_ol_A10_spikesonly_C20}
+
+%%%%%%%%%%%% OL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h] 
+\begin{center}
+\subfloat[example controlled trajectory] 
+{
+\label{fig:ML_example_controled_traj}
+\includegraphics[width=\textwidth]
+{Figs/MLTrainController/MLSim_example_ol_Amax10_spikesonly.pdf} 
+}\\
+\subfloat[raster plot for controlled simulations]
+{
+\label{fig:ML_raster_plot}
+\includegraphics[width=\textwidth]
+{Figs/MLTrainController/MLSim_raster_ol_Amax10_spikesonly.pdf} 
+}
+\caption[labelInTOC]{Same as \cref{fig:ML_controled_simulation_ol_A10}, but now
+the parameters are estimated using spikes-only ($N=92 $spikes for estimation
+$T=20$ secs.)}
+\label{fig:ML_controled_simulation_ol_A10_spikesonly}
+\end{center}
+\end{figure}
+\begin{figure}[h] 
+\begin{center}
+\subfloat[example controlled trajectory] 
+{ 
+\label{fig:ML_example_controled_traj}
+\includegraphics[width=\textwidth]
+{Figs/MLTrainController/MLSim_example_ol_Amax10_spikesonly_C20.pdf} 
+}\\
+\subfloat[raster plot for controlled simulations]
+{
+\label{fig:ML_raster_plot}
+\includegraphics[width=\textwidth]
+{Figs/MLTrainController/MLSim_raster_ol_Amax10_spikesonly_C20.pdf} 
+}
+\caption[labelInTOC]{Same as
+\cref{fig:ML_controled_simulation_ol_A10_spikesonly}, but now the $C$ parameter
+is fixed at $20.0$ (millisecs/ohms?) instead of using the voltage-based
+estimation (when $C=39.46$ see \cref{tab:OU_from_ML1_ests}))}
+\label{fig:ML_controled_simulation_ol_A10_spikesonly_C20}
+\end{center}
+\end{figure}
+
+\bibliographystyle{plain}
+\bibliography{library}
+\end{document}

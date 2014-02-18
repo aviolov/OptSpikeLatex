@@ -418,8 +418,8 @@ justified if we impose artificial reflecting boundaries for the diffusion at
 $\xmin$. So we need to determine for which $\xmin$ is a reflecting boundary
 consistent with the dynamics. For example, we can take $\xmin$ to be two
 standard deviations below the mean of the stationary distribution of the
-maximally inhibited, $\a=\amin$, \cref{eq:current_mu_alpha}. That is we set
-$\xmin = \tc(\mu + \amin) - 2 \b / \sqrt{\tc/2}$. We further enforce
+maximally inhibited process, i.e.\ setting $\a=\amin$ in
+\cref{eq:current_mu_alpha}. That is we set $\xmin = \tc(\mu + \amin) - 2 \b / \sqrt{\tc/2}$. We further enforce
 that $\xmin \leq -0.5$.
 % Ooops, we need $\di_x\v\neq 0$ and here we are setting $\di_x\v= 0$ in one of
 % the BCs\ldots oh well.
@@ -535,7 +535,7 @@ the solution to \cref{eq:OC_LS_HJB_full}, for each of the parameter regimes.
   Note that all red value function curves go to zero at the threshold to satisfy
   the upper BC in \cref{eq:OC_LS_HJB_full}.
   Note that the green and blue
-  curves in F) are lying on top of each other for all $x$.
+  curves in D) are lying on top of each other for all $x$.
   \\
   A,B) Supra-Threshold-Low-Noise
   C,D) Supra-Threshold-High-Noise
@@ -1373,8 +1373,8 @@ further here.
 \begin{figure}[htp]
 \begin{center}
   \includegraphics[width=\textwidth]{Figs/HJB/Regimes_eps_comparison.pdf}
-  \caption[labelInTOC]{Effect of $\e$ on the closed-loop control. Snapshots of
-  $\a(x,t)$ for $t$ fixed, at the start (blue), mid-point (green) and end-point
+  \caption[labelInTOC]{Effect of energy parameter $\e$ on the closed-loop
+  control. Snapshots of $\a(x,t)$ for $t$ fixed, at the start (blue), mid-point (green) and end-point
   (red), for each of the four regimes and different values of $\eps$.
   On the left, we use $\eps = 0.001$ and on the right $\eps = 0.1$.
   The desired spike time is set to

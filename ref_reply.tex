@@ -8,12 +8,12 @@
 \usepackage{amsthm} 
 %\usepackage{circuitikz}
 % \usepackage{pgf}
-% \usepackage{tikz}
+% \usepackage{tikz} 
 % \usetikzlibrary{arrows,snakes,backgrounds}
-% \usepackage{verbatim} 
 % \usetikz
-% \usepackage{subfig}
-% \usepackage{graphicx}
+% \usepackage{verbatim} 
+\usepackage{subfig} 
+\usepackage{graphicx}
 \newtheorem*{rep}{Reply}
 % \usepackage[super]{nth}
 % \usepackage{appendix}
@@ -52,8 +52,7 @@ Andr\'e Longtin
 We want to thank the 4 referees for the thoughtful and concrete points made on
 our submission. We will attempt to answer all their concerns in a point-by-point
 fashion. Below, we list the referees comments and then our replies immediately
-following each comment with '\begin{rep} TODO: \end{rep}' to indicate the reply.  
-
+following each comment.
 \tableofcontents
 
 \clearpage
@@ -64,21 +63,55 @@ This is a nice study in which the authors study optimal control of spike timing 
 \item the authors already compare their methodology with that of other in the
 introduction, these statements should be moved to the discussion.
 \begin{rep}
-
+TODO
 \end{rep}
 
 \item can the authors quantify the performance of their algorithm (e.g. \% of
 correct spikes) as a function of model parameters (e.g. noise intensity) in
 different regimes. I believe that these will be more informative to the reader.\begin{rep}
-
+Note that this is a function of $\alpha_{max}$. So this really needs to be a two
+dimensional plot with $\beta$ and $\alpha_{max}$ as independent axes.
+See figure \ref{fig:target_error_as_func_of_beta} for how this might look,
+where we investigate a Cartesian product of [Sub-Threshold, Supra-Threshold]
+Target Trains being tracked by [Sub-Threshold, Supra-Threshold] tracking
+trains, with showing three different error metrics as a function of $\beta$.
+%\usepackage{graphics} is needed for \includegraphics
+\begin{figure}[htp] 
+\begin{center}
+\subfloat[Sub-T Target / Sub-T Tracker]{
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/ControlError_Stats_cl_subthn_6_16_subt}
+  }\\
+  \subfloat[Sub-T Target / Supra-T Tracker]{
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/ControlError_Stats_cl_subthn_6_16_SUPT}
+  }
+  \\
+\subfloat[Supra-T Target / Sub-T Tracker]{
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/ControlError_Stats_cl_supthn_8_16_subt}
+  }\\
+\subfloat[Supra-T Target / Supra-T Tracker]{
+  \includegraphics[width=.99\textwidth]{Figs/TrainController/ControlError_Stats_cl_supthn_8_16_SUPT}
+  }    
+  \caption[labelInTOC]{Errors as a function of noise intensity for the
+  CLOSED-LOOP controller. A 'correct' spike for the purposes of calculating
+  'Percent Correct' is one that is within .1$\cdot \hat I$ of the target spike, where $\hat I$ is the mean ISI of
+ the target train, here about .665}
+  \label{fig:target_error_as_func_of_beta}
+\end{center}
+\end{figure} 
 \end{rep}
 \end{enumerate}
 
 \clearpage
 \section{Referee: 2}
 
-In this manuscript, the problem of controlling the spike firing times in response to stimulating waveforms was considered in the closed- and open-loop control schemes. In particular, the authors have proposed a procedure for determining the stimulating waveform in the open-loop situation which is useful for clinical situations. The reviewer thinks that the results of the manuscript are interesting and the manuscript would be well organized. However, some issues need to be clarified before recommending the manuscript for publication in Journal of Neural Engineering.
-
+In this manuscript, the problem of controlling the spike firing times in
+response to stimulating waveforms was considered in the closed- and open-loop
+control schemes. In particular, the authors have proposed a procedure for
+determining the stimulating waveform in the open-loop situation which is useful
+for clinical situations. The reviewer thinks that the results of the manuscript
+are interesting and the manuscript would be well organized. However, some issues
+need to be clarified before recommending the manuscript for publication in
+Journal of Neural Engineering.
 
 \subsection{Major issue}
 Many readers would wonder if it would be appropriate to determine the
@@ -92,17 +125,23 @@ should have clearly stated whether or not the spike time error could be canceled
 by the succeeding spike time after the inaccurate preceding spike time given, in
 the multi-spike control.
 \begin{rep}
-
+TODO
+Put an explanation in beginning of section 5.2, and emphasize that quick
+succeeding ISIs are the main bane. There should be no accumulation of errors
+unless the controller is actually unable to catch up to an extremely high firing rate. 
+But otherwise the controller is adaptive to the realized spike times such that
+it is always targeting the original target train. 
 \end{rep}
 \subsection{Some other issues}
 \begin{enumerate}
   \item 
---In l.6, Page 4 of 33, the authors stated “a non-neglegible noise component
+--In l.6, Page 4 of 33, the authors stated “a non-negligible noise component
 ...”. What kind of noise would the authors assume? Is that a weak or strong one?
 Is that Gaussian or not? Is that white or colored one?
 \begin{rep}
-It is clear taht the referee is confused. By non-negligible noise component, we
-mean a value of $\b >> 0 $.
+By non-negligible noise component, we
+mean a value of $\beta >> 0 $, while the noise is always Gaussian in the sense
+that the SDE is driven by a Gaussian, white noise. 
 \end{rep}
 
 \item In 3.1 HJB equation subsection, the authors mentioned repeatedly the HJB 3
@@ -119,14 +158,29 @@ H) in Figure 2.
 \begin{rep}
 We can replace the surface plots for the value function with surface plots for
 the control instead?
+We make surface plots for $\alpha(x,t)$ IN ADDITION to fig. 3. An example is
+shown in figure \ref{fig:HJB_control_surface}. Note that the aspect
+of the new figure is rotated relative to the surface plots of $v(x,t)$, because
+the different surfaces are best seen from different angles respectively.
+
+TODO: Add to draft. 
+%\usepackage{graphics} is needed for \includegraphics
+\begin{figure}[htp]
+\begin{center}
+  \includegraphics[width=\textwidth]{Figs/HJB/Regimes_controlsurf.pdf}
+  \caption[labelInTOC]{Surface plots for $\alpha(x,t)$ analogous to the surface
+  plots for $v(x,t)$ in figure 3 in the draft}
+  \label{fig:HJB_control_surface}
+\end{center}
+\end{figure} 
 \end{rep}
 \item In Simulations section, Page 18 of 33, the results of the naive control seem
 unnecessary.
 \begin{rep}
-Both Susanne and Alex disagree. The point of the naive control as far as Alex is
-concerned is to provide a base-case against which to compare the 'optimal'
-stimulus. If the optimal stimulus improves things by 5,10\% then it is  hard to
-justify its computational cost. 
+Both Susanne and Alex disagree with the ref. The point of the naive control as
+far as Alex is concerned is to provide a base-case against which to compare the 'optimal'
+stimulus. Our main justification is that if the optimal stimulus improves things
+by 5,10\% then it is hard to justify its computational cost. 
 \end{rep}
 
 \item In the right column of Figure 6 in Page 22 of 33, 3 sample realizations of
@@ -134,14 +188,22 @@ x(t) and alpha(t) at epsilon=0.1 are depicted, but any explanation about those
 graphs could not be found in section 6 or anywhere else, although the authors
 have stated in the legend of Fig.6 “... see section 6)”.
 \begin{rep}
-
+TODO
 \end{rep}
-\item In l. 7 in Page 23 of 33, “High Noise” should be deleted.
+\item In l. 7 in Page 23 of 33, 'High Noise' should be deleted.
 \begin{rep}
-TODO:
+TODO: Here is the offending line
+'In all cases,
+the target train is obtained by a simulation of the Supra-Threshold High Noise
+regime with no additional control, i.e.\ $\alpha(\cdot) = 0$.' It is actually on
+page 22 in draft (perhaps there is an extra first page in the referee's copy).
+
+I don't see why we should remove the High Noise qualifier. There is a
+significant difference between a target train generated by 'Supra-Threshold High
+Noise' vs.\ 'Supra-Threshold Low Noise'. 
 \end{rep}
 \item In the fourth paragraph in Page 23 of 33, the authors mentioned “In fig. 11,
-we relax the bound constrains on the control $[\amin, \amax]$ from
+we relax the bound constrains on the control $[\alpha_{min}, \alpha_{max}]$ from
 [-2;2] to [-4;4].”. However they depicted the firing rates and dot raster plots only in
 the case of the closed-loop control in Figure 11. They might want to show the
 simulation results of the open-loop control scheme in relaxing the constraints
@@ -150,7 +212,34 @@ realizations of alpha(t) or the mean of alpha(t) as a function of time as well
 as the firing rates and dot raster plots in the closed- and open-control
 schemes.
 \begin{rep}
-TODO:
+TODO: Also do the relaxed bounds for open-loop???
+
+Unfortunately, averaging $\alpha(X_t,t)$ over the different tracking trains
+is not particularly sensible. In particular consider the case when one
+tracking train has just spiked, while the other is delayed. Then the average
+of the controls will be zero, even though one is max and the other is min. As
+showing an average seems uninformative of what is going on. 
+
+Instead we show one closed-loop / open-loop full-train realization of the
+voltage / control signal, $X_t, \alpha(X_t, t)$ for a
+single train in figure \ref{fig:tracking_train_trajectories}. In a sense this is
+just 16 copies glued side-by-side of the realizations we see in section 5.1.
+
+%\usepackage{graphics} is needed for \includegraphics
+\begin{figure}[htp]
+\begin{center}
+\subfloat[Closed Loop]{
+  \includegraphics[width=\textwidth]{Figs/TrainController/SingleTrain_Trajectories_SUPT_supthn_8_16_cl.pdf}
+   }\\
+  \subfloat[Open Loop]{ 
+   \includegraphics[width=\textwidth]{Figs/TrainController/SingleTrain_Trajectories_SUPT_supthn_8_16_ol.pdf}
+  }
+  \caption[labelInTOC]{Full Tracking Train trajectories for $X_t$,
+  $\alpha(X_t,t)$}
+  \label{fig:tracking_train_trajectories}
+\end{center}
+\end{figure}
+
 \end{rep}
 \item In 3-4 lines before the section 6, “For example, in figs. 6 and 7” should be
 replaced by “For example, in figs 7 and 8”.
@@ -163,21 +252,53 @@ reach of the neuron, this is not a problem.” However, many readers would wonde
 how much reasonable reach could be, since they might think of if the reach would
 be longer or shorter than the refractory period.
 \begin{rep}
+
+Indeed, this is unprecise. Refractory period is clearly unreasonable, but more
+than that, we consider any period that is shorter than the time it takes to
+deterministically under maximum excitation. 
+
+WE have added the following two sentences to the draft:
 TODO:
+
 \end{rep}
 \item In Page 28 of 33. the left column of Figure 12 should be deleted because
 of a duplication of the right column of Figure 2. Instead, the right column of Figure
 12, alpha(x,t), should be depicted explicitly in 3 dim as functions of x and t.
 \begin{rep}
 TODO:
+Are we going to make surface plots here again?
 \end{rep}
 \item In the left column of Figure 13 in Page 29 of 33, the traces were same as
 those of Figure 4. The authors might want to refine how to show us the effect of
 energy penalty.
 \begin{rep}
-The two traces are the same! They are added here to compare against
+The two traces are indeed the same! They are added here to compare against
 the traces on the right, so that people don't flip back and forth for figures to
-appreciate what has changed
+appreciate what has changed.
+We will put both epsilon, open-loop curves on the same plots (red vs.
+blue) see figure \ref{fig:epsilong_comparison_same_graph}.
+%\usepackage{graphics} is needed for \includegraphics
+\def \T {{ T}}
+\begin{figure}[htp]
+\begin{center}
+  \includegraphics[width=\textwidth]{Figs/FP_Adjoint/Regimes_eps_comparison_joined.pdf}
+  \caption[labelInTOC]{Effect of $\epsilon$ on the open-loop control.
+  The deterministic time-trajectory of $\alpha(t)$ for each
+  parameter regime as function of time, $t \in [0, \T]$.
+  On the left, we use $\epsilon = 0.001$ and on the right $\epsilon =0.1$.
+  The desired spike time is set to $\T=1.5$ and the bounds are $\alpha \in
+  [-2,2]$. A)
+   Supra-Threshold-Low-Noise
+    B) 
+   Supra-Threshold-High-Noise
+    C)
+   Sub-Threshold-Low-Noise 
+    D)
+   Sub-Threshold-High-Noise}
+  \label{fig:epsilong_comparison_same_graph}
+\end{center}
+\end{figure}
+
 \end{rep}
 
 \item In the fourth paragraph of discussion section in Page 30 of 33, the
@@ -188,9 +309,12 @@ noise itself elicits spikes.
 \begin{rep}
 TODO: I don't understand the referee. Susanne pointed out that we need to
 clarify that in all cases, the maximum value of the control puts the model in
-the Supra-Threshold regime. That is using the control one can always have
-Supra-Threshold behaviour. The Supra / Sub- distinction only applies to the
-intrinsic (uncontrolled dynamics)
+the Supra-Threshold regime. This means that by using the control one can
+always achieve Supra-Threshold behaviour. The Supra / Sub- distinction only
+applies to the intrinsic (uncontrolled dynamics) and they are defined in the
+absence of control.
+
+TODO: Add ANdre's notes on Stochastic Resonance from his letter here. 
 \end{rep}
 \end{enumerate}
 
@@ -222,6 +346,11 @@ way around those limitations. The authors allude to this in the discussion
 section, but I think this needs a more elaborate discussion with possible
 suggestions.\begin{rep}
 TODO:
+This has to be intra-cellular injected current.
+
+We require to have access to the output of the neuron.
+
+We can use optogenetics\ldots
 \end{rep}
 
 2. Related to 1 above, the authors mention several highly sophisticated
@@ -232,7 +361,7 @@ neurons are much different than single neurons, and that the focus of the
 current manuscript is on single neuron behaviour, I strongly suggest that the
 authors revise the application sections of their paper and include other
 physiological applications that are more relevant.\begin{rep}
-TODO:
+TODO: Include more single-cell applications.
 \end{rep}
 3. The authors need to acknowledge the difference between the Maximum Principle
 as an optimal control theory that they have used and Dynamic Programming as an
@@ -243,7 +372,30 @@ control problem, the fact that the control is bounded, means that one needs to
 use the Maximum Principle to find the optimal control, just as the authors have
 in (9). The Maximum Principle yields the control (9) and Dynamic Programming is
 just a numerical method for solving for the optimal trajectories.\begin{rep}
-TODO:
+It is our impression that (Pontryagin's) Maximum Principle and (Bellman's)
+Dynamic Programing approach are two distinct analytical methods for solving
+Optimal Control problems.
+
+The Maximum Principle is essentially a generalization of The Calculus of
+Variations wherein it finds a critical point for the objective, akin to the
+First Derivative Test in 1st year Calculus.
+(refer to sources here)
+
+Dynamic Programing is a sequential approach which builds up the optimal control
+from the end-time recursively, using a value function to efficiently represent
+the entire future payoff / cost associated with an incremental decision. (refer to
+sources here)
+
+There are connections between the two, most saliently, under certain conditions,
+the adjoint function in the Maximum Principle is the spatial gradient of the
+value function in Dynamic Programing (reference). But the two arise from
+different paradigms and in turn give rise to different numerical methods. 
+
+The difference in numerical methods is apparent in particular in that when we
+apply Dynamic Programing, we can infer the optimal control right away, while for
+the Maximum Principle, we are forced to use an iterative, gradient descent
+procedure.
+
 \end{rep}
 
 4. How can these methods extend to networks of neurons efficiently? For
@@ -252,15 +404,22 @@ were to make a coupled network of integrate-and-fire neurons, perhaps in an
 effort to model network-level pathology, how can this network be solved
 numerically in a time-efficient manner?\begin{rep}
 TODO:
+Running N parallel neurons is not a problem, naturally.
+
+However, controlling N coupled neurons is VERY challenging and certainly beyond
+the limits of the techniques presented as is. 
 \end{rep}
 
 5. When epsilon is small, some of the controls that the authors have computed
 are very similar to a bang-bang type control and even seem to have a net area
 under curve of close to zero. I think it will help the comprehensiveness of the
 paper if the authors made a somewhat elaborate connection between their
-formulism to that of a bang-bang control formulism. And also explain why these
+formalism to that of a bang-bang control formalism. And also explain why these
 controls come out almost balanced in negative and positive values.\begin{rep}
 TODO:
+1. Indeed as $\epsilon$ goes to zero, the optimization becomes bang-bang.
+
+2. The occassional case where the controls are charge-balanced happens to be 
 \end{rep}
 
 \subsection{Minor comments/questions:}
@@ -278,32 +437,63 @@ TODO:
 
 P7,L44: Why do the authors assume for $x<<0$, w is not significantly affected?
 What do they mean by $x<<0$? Looking at Figure 1, min(x) is usually around zero,
-unless there is high noise, in which case it becomes in the order of -1 to -10 probably. 
-Please elaborate a little.
+unless there is high noise, in which case it becomes in the order of -1 to -10
+probably. Please elaborate a little.
 \begin{rep}
-TODO:
+TODO: Here is the offending paragraph redone:
+ \def \xmin {{ x_{-}}}
+  \def \amin {{ \alpha_{-}}}
+  \def \tc {{ \tau_c}}
+ 'For $x \ll 0$, we assume that $w$ is not
+significantly affected by the change in $x$, i.e.\ that $$ \partial_x
+w(x_{-}, t) = 0 $$ for some lower boundary $x_{-}$. Such a boundary condition will be
+justified if we impose artificial reflecting boundaries for the diffusion at
+$\xmin$. So we need to determine for which $\xmin$ is a reflecting boundary
+consistent with the dynamics. For example, we can take $\xmin$ to be two
+standard deviations below the mean of the stationary distribution of the
+maximally inhibited process, i.e.\ setting $\alpha=\amin$ in eq. [2].
+ That is we set $\xmin = \tc(\mu + \amin) - 2 \beta /
+\sqrt{\tc/2}$. We further enforce that $\xmin \leq -0.5$.'
 \end{rep}
-P10, Caption of Figure 2: "Note that the green and blue curves in F) are lying on top of each other for all x." This is not true. Did the authors mean subplot (D)? And can you explain why it is that the green and blue curves are on top of each other?
+
+P10, Caption of Figure 2: "Note that the green and blue curves in F) are lying
+on top of each other for all x." This is not true. Did the authors mean subplot
+(D)? And can you explain why it is that the green and blue curves are on top of
+each other?
 \begin{rep}
-TODO:
+ Indeed it is D) and thanks!
+
+TODO: Add explanation for why this is so.
 \end{rep}
-The initial condition for the computations seems to be the point of previous spike, x=0. Is that right? Please make note of this where ever appropriate for clarity, for example, when showing Figure 4.
-\begin{rep}
-TODO:
+
+The initial condition for the computations seems to be the point of previous
+spike, x=0. Is that right? Please make note of this where ever appropriate for
+clarity, for example, when showing Figure 4.\begin{rep}
+TODO: Add a reminder in Fig 4 that x=0 at time t=0.
 \end{rep}
-Can the authors elaborate on the noise that they implemented in their simulations, and discuss the shape of the distributions in Figure 5, especially, for the deterministic case?
+
+Can the authors elaborate on the noise that they implemented in their
+simulations, and discuss the shape of the distributions in Figure 5, especially,
+for the deterministic case?
 \begin{rep}
-TODO:
+TODO: Hmm\ldots We use standard Wiener-type driving force for the dynamics in
+the stochastic. What is shown in Figure 5. is a function of the first passage
+time of such a noise. 
 \end{rep}
 Figure 7: What does the solid horizontal line in the lower plot represent?
 \begin{rep}
-TODO:
+TODO: The dots above the horizontal line indicate the target spike times. The
+dots below the horizontal line indicate the occurence of the tracking spike
+times. 
 \end{rep}
-"i.e." usually has commas before and after. Also, at the beginning of sentence, please consider using the words "That is" instead of "I.e." (P12,L19).
-For consistency, please consider using either Supra- or Super-Threshold throughout.
+
+"i.e." usually has commas before and after. Also, at the beginning of sentence,
+please consider using the words "That is" instead of "I.e." (P12,L19). For
+consistency, please consider using either Supra- or Super-Threshold throughout.
 \begin{rep}
-TODO:
-\end{rep}
+Definitely yes on consistent use of 'Supra-' vs. 'Super-'. Thanks. 
+TODO:  
+\end{rep}
 
 Typos and trivial mistakes: \\
 P3,L06: setting $->$ settings\\
@@ -345,39 +535,47 @@ discussion sections.
 considered only very briefly in section 7, with no figures. In any application,
 the experimenter is going to know very little about the underlying model, and
 will have to build algorithms that work around this problem.
-
-\begin{rep} TODO: \end{rep}
+\begin{rep} TODO: 
+We agree.
+\end{rep}
 
 1c. On a related front, the authors assume intracellular access  and
 use highly oversimplified integrate-and-fire models.  It would be interesting to
 test the effectiveness of the authors’ approach with more realistic models and
 with explicitly extracellular forms of stimulation. 
 
-\begin{rep} TODO: \end{rep}
+\begin{rep} TODO:
+
+Let's ignore the second part (on extracellular stimulation) and concentrate on
+the first part (more complicated models).
+
+TODO: Extracellular stimulation in the discussion only!
+\end{rep}
 
 2. The results and discussion sections could be improved by more context, to
 connect specific findings to broader conclusions from the abstract and
 introduction. 
-
-\begin{rep} TODO: \end{rep}
+\begin{rep} 
+TODO: 
+\end{rep}
 
 \subsection{Specific points}
-
 Abstract: The authors state that their goal was to design a control scheme to
 achieve a target spike train with minimal damage to tissue.  I don’t think this
 goal was achieved, because of the level of abstraction of the work.
-
-\begin{rep} TODO: \end{rep}
+\begin{rep} 
+TODO:
+ \end{rep}
 
 p. 2, first par.  The goal mentioned by the authors of control via extracellular
 stimulation does not seem to be achieved by the following work.  Also, the
 examples noted by the authors (BMIs and prosthetics) are typically thought of as
 problems for which one needs to interpret spike trains, not impose them.
 
-\begin{rep} TODO: \end{rep}
+\begin{rep} TODO: \end{rep} 
 
-p. 2, par. 3.  The sentence beginning “However the efficiency of the numerics …”
-is nearly impossible to parse and understand.
+p. 2, par. 3.  The sentence beginning ``However the efficiency of the
+numerics\ldots'' is nearly impossible to parse and understand.
 
 \begin{rep} TODO: \end{rep}
 
